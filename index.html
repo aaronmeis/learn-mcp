@@ -316,39 +316,51 @@ a { color: var(--teal); }
 details.sc-box {
   background: rgba(0,0,0,.28); border: 1px solid var(--line); border-radius: 0 6px 6px 0;
   padding: .45rem .75rem; margin-top: .4rem; font-size: 12.5px; line-height: 1.5;
+  overflow: hidden;
 }
 details.sc-box.what { border-left: 3px solid var(--teal); }
 details.sc-box.why { border-left: 3px solid var(--amber); }
 details.sc-box.how { border-left: 3px solid var(--ok); }
+/* Some Chromium builds leave details body painted while closed; force hide. */
+details.sc-box:not([open]) > *:not(summary) {
+  display: none !important;
+}
 details.sc-box summary {
+  display: flex; align-items: center; gap: 6px; width: 100%;
   cursor: pointer; font-weight: 600; outline: none; user-select: none; font-size: 12px;
-  color: var(--paper); list-style: none;
+  color: var(--paper); list-style: none; min-height: 28px;
 }
-details.sc-box summary::-webkit-details-marker { display: none; }
+details.sc-box summary::-webkit-details-marker,
+details.sc-box summary::marker { display: none; content: ""; }
 details.sc-box summary::before {
-  content: "▸ "; color: var(--muted); font-size: 11px;
+  content: "▸"; color: var(--muted); font-size: 11px; flex: 0 0 auto;
 }
-details.sc-box[open] summary::before { content: "▾ "; color: var(--amber); }
+details.sc-box[open] summary::before { content: "▾"; color: var(--amber); }
 details.sc-box[open] summary {
   margin-bottom: .35rem; border-bottom: 1px solid var(--line); padding-bottom: .25rem;
 }
 details.sc-box.what summary { color: var(--teal); }
 details.sc-box.why summary { color: var(--amber); }
 details.sc-box.how summary { color: var(--ok); }
-details.sc-box p { margin: .35rem 0 0; color: var(--paper); font-size: 12.5px; }
+details.sc-box .sc-body { margin: .35rem 0 0; color: var(--paper); font-size: 12.5px; }
+details.sc-box .sc-body p { margin: 0; color: var(--paper); font-size: 12.5px; }
 details.sc-box ul { margin: .35rem 0 0; padding-left: 1.1rem; }
 details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
 
 .lesson-list { display: grid; gap: 8px; }
 .lesson-item {
   border: 1px solid var(--line); border-radius: var(--radius); background: rgba(0,0,0,.22); padding: 0;
+  overflow: hidden;
 }
+.lesson-item:not([open]) > *:not(summary) { display: none !important; }
 .lesson-item summary {
+  display: flex; align-items: center; gap: 8px; width: 100%;
   cursor: pointer; padding: 12px 14px; font-family: var(--display); font-size: 15px; list-style: none;
 }
-.lesson-item summary::-webkit-details-marker { display: none; }
-.lesson-item summary::before { content: "▸ "; color: var(--muted); font-family: var(--mono); font-size: 12px; }
-.lesson-item[open] summary::before { content: "▾ "; color: var(--amber); }
+.lesson-item summary::-webkit-details-marker,
+.lesson-item summary::marker { display: none; content: ""; }
+.lesson-item summary::before { content: "▸"; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.lesson-item[open] summary::before { content: "▾"; color: var(--amber); }
 .lesson-item[open] summary { border-bottom: 1px solid var(--line); }
 .lesson-item p { margin: 0; padding: 12px 14px 14px; color: var(--muted); font-size: 13px; }
 
@@ -1021,9 +1033,9 @@ function showcaseCard(item, kind) {
     <div class="label">${label}</div>
     <b>${esc(item.name)}</b>
     <p class="blurb">${esc(item.blurb)}</p>
-    <details class="sc-box what"><summary>What it is</summary><p>${esc(item.what)}</p></details>
-    <details class="sc-box why"><summary>Why use it</summary><p>${esc(item.why)}</p></details>
-    <details class="sc-box how"><summary>How to use it</summary><p>${esc(item.how)}</p></details>
+    <details class="sc-box what"><summary>What it is</summary><div class="sc-body"><p>${esc(item.what)}</p></div></details>
+    <details class="sc-box why"><summary>Why use it</summary><div class="sc-body"><p>${esc(item.why)}</p></div></details>
+    <details class="sc-box how"><summary>How to use it</summary><div class="sc-body"><p>${esc(item.how)}</p></div></details>
   </article>`;
 }
 
@@ -1296,9 +1308,9 @@ function renderCapstone(cap) {
       <h3>${esc(a.id)} — ${esc(a.title)}</h3>
       <p>${esc(a.intent)}</p>
       <details class="sc-box what"><summary>Required contents</summary>
-        <ul>${a.required.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        <div class="sc-body"><ul>${a.required.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
       </details>
-      <details class="sc-box why"><summary>Pass criteria</summary><p>${esc(a.pass)}</p></details>
+      <details class="sc-box why"><summary>Pass criteria</summary><div class="sc-body"><p>${esc(a.pass)}</p></div></details>
     </article>`).join("");
   document.getElementById("capstoneBody").innerHTML = dims + arts;
 }
