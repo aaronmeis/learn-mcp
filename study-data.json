@@ -326,7 +326,7 @@
     ],
     [
       "Error code policy",
-      "`-32000`–`-32019` implementation-defined; `-32020`–`-32099` reserved for the MCP spec"
+      "`-32000`-`-32019` implementation-defined; `-32020`-`-32099` reserved for the MCP spec"
     ],
     [
       "JSON Schema 2020-12",
@@ -764,57 +764,57 @@
   "lessons": [
     {
       "id": "0001-what-is-mcp",
-      "title": "0001 — What is MCP?",
+      "title": "0001 . What is MCP?",
       "summary": "Model Context Protocol is an open JSON-RPC 2.0 protocol that lets LLM applications share context and tools with external systems. Inspiration comes from the Language Server Protocol: one integration model, many editors (here: many AI hosts).\n\nMCP does **not** dictate how the host uses the LLM or how it stores conversation history. It only standardizes context exchange."
     },
     {
       "id": "0002-architecture-host-client-server",
-      "title": "0002 — Architecture: host, client, server",
+      "title": "0002 . Architecture: host, client, server",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0003-primitives-tools-resources-prompts",
-      "title": "0003 — Primitives: tools, resources, prompts",
+      "title": "0003 . Primitives: tools, resources, prompts",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0004-transports-stdio-streamable-http",
-      "title": "0004 — Transports: stdio and Streamable HTTP",
+      "title": "0004 . Transports: stdio and Streamable HTTP",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0005-stateless-discovery-and-meta",
-      "title": "0005 — Stateless discovery and `_meta`",
+      "title": "0005 . Stateless discovery and `_meta`",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0006-mrtr-and-elicitation",
-      "title": "0006 — MRTR and elicitation",
+      "title": "0006 . MRTR and elicitation",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0007-extensions-tasks-apps-auth",
-      "title": "0007 — Extensions: Tasks, Apps, Auth",
+      "title": "0007 . Extensions: Tasks, Apps, Auth",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0008-whats-new-2026-07-28",
-      "title": "0008 — What's new in 2026-07-28",
+      "title": "0008 . What's new in 2026-07-28",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0009-security-and-trust",
-      "title": "0009 — Security and trust",
+      "title": "0009 . Security and trust",
       "summary": "[!info] Business Explanation"
     },
     {
       "id": "0010-fleet-mcp-map",
-      "title": "0010 — Fleet MCP map",
+      "title": "0010 . Fleet MCP map",
       "summary": "[!info] Business Explanation"
     }
   ],
   "cheatSheet": {
-    "roles": "Host (AI app) creates clients. Each client is 1:1 with one server. Servers expose tools, resources, prompts and must not see the full multi-server conversation.",
+    "roles": "Host (AI app) creates clients. Each client connects 1:1 to one server. Servers expose tools, resources, and prompts. They must not see the full multi-server conversation.",
     "metaKeys": [
       [
         "io.modelcontextprotocol/protocolVersion",
@@ -908,15 +908,15 @@
   },
   "changelog": {
     "major": [
-      "No protocol-level sessions — Mcp-Session-Id removed. Cross-call state uses server-minted handles as ordinary tool args (SEP-2567).",
-      "Stateless MCP — initialize / notifications/initialized removed. Every request carries version + client capabilities in _meta (SEP-2575).",
-      "server/discover required — advertise versions, capabilities, identity.",
+      "No protocol-level sessions . Mcp-Session-Id removed. Cross-call state uses server-minted handles as ordinary tool args (SEP-2567).",
+      "Stateless MCP . initialize / notifications/initialized removed. Every request carries version + client capabilities in _meta (SEP-2575).",
+      "server/discover required . advertise versions, capabilities, identity.",
       "subscriptions/listen replaces HTTP GET + resources/subscribe for change notifications.",
       "Removed ping, logging/setLevel, notifications/roots/list_changed. Log level is per-request via _meta logLevel.",
-      "Tasks moved to extension io.modelcontextprotocol/tasks — poll tasks/get, mid-flight tasks/update (SEP-2663).",
-      "MRTR replaces server-initiated requests — InputRequiredResult + client retry (SEP-2322).",
-      "Required resultType — complete or input_required.",
-      "No SSE resumability — broken stream ⇒ client re-issues with a new request id."
+      "Tasks moved to extension io.modelcontextprotocol/tasks . poll tasks/get, mid-flight tasks/update (SEP-2663).",
+      "MRTR replaces server-initiated requests . InputRequiredResult + client retry (SEP-2322).",
+      "Required resultType . complete or input_required.",
+      "No SSE resumability . broken stream ⇒ client re-issues with a new request id."
     ],
     "deprecated": [
       [
@@ -1042,5 +1042,127 @@
       "src": "assets/diagrams/mcp-whats-new-2026-07-28.png",
       "alt": "MCP what is new diagram 2026-07-28"
     }
-  ]
+  ],
+  "resources": {
+    "primary": [
+      {
+        "title": "Spec 2026-07-28",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+        "why": "Authoritative protocol text for this study pin."
+      },
+      {
+        "title": "Changelog vs 2025-11-25",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/changelog",
+        "why": "Official list of breaks, moves, and deprecations."
+      },
+      {
+        "title": "Architecture (learn)",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+        "why": "Host / client / server map in plain language."
+      },
+      {
+        "title": "Server concepts",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts",
+        "why": "Tools, resources, prompts with examples."
+      },
+      {
+        "title": "Client concepts",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/client-concepts",
+        "why": "Elicitation first. Sampling is deprecated."
+      },
+      {
+        "title": "MRTR pattern",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr",
+        "why": "How servers ask for input without initiating JSON-RPC requests."
+      },
+      {
+        "title": "Transports",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports",
+        "why": "stdio and Streamable HTTP bindings."
+      },
+      {
+        "title": "Extensions overview",
+        "url": "https://modelcontextprotocol.io/extensions/overview",
+        "why": "Tasks, Apps, and auth extensions sit outside core."
+      },
+      {
+        "title": "Schema.ts",
+        "url": "https://github.com/modelcontextprotocol/specification/blob/main/schema/2026-07-28/schema.ts",
+        "why": "Canonical types for reviews and conformance."
+      },
+      {
+        "title": "llms.txt index",
+        "url": "https://modelcontextprotocol.io/llms.txt",
+        "why": "Machine-readable map of the dated docs tree."
+      }
+    ],
+    "build": [
+      {
+        "title": "Build a server",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-server"
+      },
+      {
+        "title": "Build a client",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-client"
+      },
+      {
+        "title": "Client best practices",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/clients/client-best-practices"
+      },
+      {
+        "title": "MCP Inspector",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector"
+      },
+      {
+        "title": "Security best practices",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices"
+      },
+      {
+        "title": "Authorization tutorial",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization"
+      },
+      {
+        "title": "Example servers",
+        "url": "https://modelcontextprotocol.io/examples"
+      },
+      {
+        "title": "SDKs",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/sdk"
+      }
+    ],
+    "extensions": [
+      {
+        "title": "Tasks",
+        "url": "https://modelcontextprotocol.io/extensions/tasks/overview"
+      },
+      {
+        "title": "MCP Apps",
+        "url": "https://modelcontextprotocol.io/extensions/apps/overview"
+      },
+      {
+        "title": "OAuth client credentials",
+        "url": "https://modelcontextprotocol.io/extensions/auth/oauth-client-credentials"
+      },
+      {
+        "title": "Enterprise-managed auth",
+        "url": "https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization"
+      },
+      {
+        "title": "Registry",
+        "url": "https://modelcontextprotocol.io/registry/about"
+      }
+    ],
+    "blogs": [
+      {
+        "title": "The 2026-07-28 Specification",
+        "url": "https://blog.modelcontextprotocol.io/posts/2026-07-28/",
+        "why": "Maintainer narrative for the July revision."
+      },
+      {
+        "title": "The New MCP Roadmap",
+        "url": "https://blog.modelcontextprotocol.io/posts/mcp-roadmap/",
+        "why": "What shipped vs what working groups still own."
+      }
+    ]
+  }
 }

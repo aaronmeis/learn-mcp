@@ -158,6 +158,7 @@ tr:hover td { background: rgba(46,196,182,.05); }
 .btn {
   font-family: var(--mono); cursor: pointer; border: 1px solid var(--amber); background: transparent;
   color: var(--amber); padding: 8px 12px; border-radius: var(--radius);
+  text-decoration: none; display: inline-block;
 }
 .btn:hover { background: var(--amber); color: var(--ink); }
 .btn.ghost { border-color: var(--line); color: var(--muted); }
@@ -394,6 +395,14 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
   padding: 14px; background: rgba(0,0,0,.22); margin-bottom: 12px;
 }
 .cap-card h3 { margin: 0 0 6px; color: var(--amber); }
+.resource-section { margin-bottom: 18px; }
+.resource-section h3 { margin-bottom: 8px; }
+.resource-card {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+  background: rgba(0,0,0,.22); margin-bottom: 8px;
+}
+.resource-card a { font-family: var(--display); font-size: 15px; }
+.resource-card p { margin: 6px 0 0; color: var(--muted); font-size: 12.5px; }
 
 @media (max-width: 1100px) {
   .grid.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -437,7 +446,7 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
       <div>
         <div class="brand-kicker">Sodium Arc Spec · Public study console</div>
         <h1>Learn MCP <span>2026-07-28</span></h1>
-        <p class="sub">Study console for the July 2026 Model Context Protocol revision: discovery, MRTR, transports, extensions, and migration drills. Study material only.</p>
+        <p class="sub">Personal study console for MCP revision 2026-07-28. Covers discovery, MRTR, transports, extensions, and migration drills. Not official docs.</p>
       </div>
       <div class="pin">
         <strong id="overallPct">0%</strong>
@@ -450,6 +459,7 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
       <button data-tab="progress">Ladders</button>
       <button data-tab="changes">Change map</button>
       <button data-tab="cheat">Cheat sheet</button>
+      <button data-tab="resources">Resources</button>
       <button data-tab="readings">Readings</button>
       <button data-tab="cards">Flashcards</button>
       <button data-tab="quiz">Quiz</button>
@@ -547,9 +557,21 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
   <section class="panel" id="cheat">
     <div class="panel-head">
       <h2>Protocol cheat sheet</h2>
-      <p class="muted">One-page lookup for roles, `_meta`, RPCs, transports, and security.</p>
+      <p class="muted">Roles, <code>_meta</code>, RPCs, transports, security. Printable one-pager included.</p>
+    </div>
+    <div class="row">
+      <a class="btn" href="cheat-sheet.html" target="_blank" rel="noopener">Open one-page cheat sheet</a>
+      <span class="muted">Letter-sized page. In the browser use Print, then Save as PDF.</span>
     </div>
     <div id="cheatSheet"></div>
+  </section>
+
+  <section class="panel" id="resources">
+    <div class="panel-head">
+      <h2>Resources</h2>
+      <p class="muted">High-trust links we actually cite. Official dated docs first.</p>
+    </div>
+    <div id="resourcesBody"></div>
   </section>
 
   <section class="panel" id="readings">
@@ -671,7 +693,7 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
   </section>
 
   <footer class="footer">
-    <span>Learn MCP · Sodium Arc Spec</span>
+    <span>Learn MCP · Sodium Arc Spec · <a href="disclaimer.md">Disclaimer</a> · <a href="cheat-sheet.html">Cheat sheet (print)</a></span>
     <span>Spec pin 2026-07-28 · browser-local progress · not official docs</span>
   </footer>
 </div>
@@ -1090,7 +1112,7 @@ const SHOWCASE_CLASSIC = [
   {
     name: "Context7", transport: "Remote", blurb: "Up-to-date library docs",
     what: "Same Context7 docs MCP listed in the Top 10: version-specific library documentation over a remote transport.",
-    why: "It is one of the highest-leverage first installs for coding agents that must cite current APIs.",
+    why: "One of the first installs that pays off for coding agents that need current APIs.",
     how: "Add the remote endpoint, request docs for one library you know well, and sanity-check the answer. Use it whenever the model invents outdated APIs."
   },
   {
@@ -1281,6 +1303,23 @@ function renderCapstone(cap) {
   document.getElementById("capstoneBody").innerHTML = dims + arts;
 }
 
+function renderResources(res) {
+  if (!res) return;
+  const block = (title, items, withWhy) => `
+    <div class="resource-section"><h3>${esc(title)}</h3>
+      ${items.map(r => `<article class="resource-card">
+        <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>
+        ${withWhy && r.why ? `<p>${esc(r.why)}</p>` : ""}
+      </article>`).join("")}
+    </div>`;
+  document.getElementById("resourcesBody").innerHTML =
+    block("Primary (pin these)", res.primary || [], true) +
+    block("Build and debug", res.build || [], false) +
+    block("Extensions", res.extensions || [], false) +
+    block("Maintainer posts", res.blogs || [], true) +
+    `<p class="muted">Also see the <a href="disclaimer.md">disclaimer</a>. Prefer dated <code>/specification/2026-07-28/</code> and <code>/docs/2026-07-28/</code> paths over <code>/latest</code>.</p>`;
+}
+
 (async function loadStudy() {
   try {
     const res = await fetch("study-data.json?ts=" + Date.now());
@@ -1303,6 +1342,7 @@ function renderCapstone(cap) {
     renderReadings();
     renderSeps(STUDY.seps);
     renderCapstone(STUDY.capstone);
+    renderResources(STUDY.resources);
   } catch (e) {
     console.warn("study-data.json not ready", e);
   }

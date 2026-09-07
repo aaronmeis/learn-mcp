@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MCP 2026-07-28 — one-page cheat sheet</title>
+<style>
+  :root {
+    --ink: #0b1220;
+    --line: #c9d0db;
+    --muted: #4a5568;
+    --teal: #0f766e;
+    --amber: #b45309;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: var(--ink); font: 10.5pt/1.35 "Segoe UI", system-ui, sans-serif;
+    background: #e8e4d9;
+  }
+  .sheet {
+    width: 8.5in; min-height: 11in; margin: 12px auto; padding: .42in .48in;
+    background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.18);
+  }
+  header {
+    display: flex; justify-content: space-between; gap: 12px; align-items: end;
+    border-bottom: 2.5px solid var(--amber); padding-bottom: 6px; margin-bottom: 8px;
+  }
+  h1 { font-size: 16pt; margin: 0; letter-spacing: -.02em; }
+  h1 span { color: var(--amber); }
+  .meta { font-size: 8pt; color: var(--muted); text-align: right; max-width: 42ch; }
+  .toolbar { display: flex; gap: 8px; margin: 0 auto 10px; width: 8.5in; justify-content: flex-end; }
+  .toolbar a, .toolbar button {
+    font: 10pt/1 "Segoe UI", system-ui, sans-serif; padding: 7px 10px; border: 1px solid #334; border-radius: 4px;
+    background: #0b1220; color: #f5f0e6; text-decoration: none; cursor: pointer;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+  section {
+    border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; break-inside: avoid;
+  }
+  section.wide { grid-column: 1 / -1; }
+  h2 {
+    font-size: 9.5pt; margin: 0 0 4px; color: var(--teal); text-transform: uppercase;
+    letter-spacing: .06em; border-bottom: 1px solid var(--line); padding-bottom: 2px;
+  }
+  p, li { margin: 0 0 3px; font-size: 8.6pt; }
+  ul, ol { margin: 0; padding-left: 1.1em; }
+  table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+  th, td { text-align: left; vertical-align: top; padding: 2px 4px 2px 0; border-bottom: 1px solid #edf0f5; }
+  th { color: var(--muted); font-weight: 600; font-size: 7.5pt; text-transform: uppercase; letter-spacing: .04em; }
+  code { font-family: Consolas, "Cascadia Code", monospace; font-size: 7.8pt; }
+  footer {
+    margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--line);
+    font-size: 7.5pt; color: var(--muted); display: flex; justify-content: space-between; gap: 10px;
+  }
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none !important; }
+    .sheet { margin: 0; box-shadow: none; width: auto; min-height: auto; padding: .35in .4in; }
+    @page { size: letter; margin: 0.35in; }
+  }
+</style>
+</head>
+<body>
+<div class="toolbar">
+  <a href="./">Back to study console</a>
+  <button type="button" onclick="window.print()">Print / save PDF</button>
+</div>
+<main class="sheet">
+  <header>
+    <div>
+      <h1>MCP cheat sheet <span>2026-07-28</span></h1>
+    </div>
+    <div class="meta">
+      Personal study aid. Spec pin:
+      modelcontextprotocol.io/specification/2026-07-28
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="wide">
+      <h2>Roles</h2>
+      <p><b>Host</b> = AI app (consent + orchestration). <b>Client</b> = one connector, 1:1 with one server. <b>Server</b> = tools / resources / prompts. Servers must not see the full multi-server conversation.</p>
+    </section>
+
+    <section>
+      <h2>Every request _meta</h2>
+      <table>
+        <tr><th>Key</th><th>Who</th><th>Purpose</th></tr>
+        <tr><td><code>protocolVersion</code></td><td>Client</td><td><code>2026-07-28</code></td></tr>
+        <tr><td><code>clientCapabilities</code></td><td>Client</td><td>elicitation, extensions, …</td></tr>
+        <tr><td><code>clientInfo</code></td><td>Client SHOULD</td><td>name + version</td></tr>
+        <tr><td><code>serverInfo</code></td><td>Server SHOULD</td><td>on results</td></tr>
+        <tr><td><code>logLevel</code></td><td>Client opt.</td><td>replaces logging/setLevel</td></tr>
+      </table>
+      <p>Keys live under <code>io.modelcontextprotocol/…</code> in <code>_meta</code>.</p>
+    </section>
+
+    <section>
+      <h2>Core RPCs</h2>
+      <table>
+        <tr><th>Side</th><th>Method</th><th>Notes</th></tr>
+        <tr><td>MUST</td><td><code>server/discover</code></td><td>versions, capabilities, identity</td></tr>
+        <tr><td>Server</td><td><code>tools/list|call</code></td><td>stable list order SHOULD</td></tr>
+        <tr><td>Server</td><td><code>resources/list|read</code></td><td>+ templates</td></tr>
+        <tr><td>Server</td><td><code>prompts/list|get</code></td><td>templated workflows</td></tr>
+        <tr><td>Either</td><td><code>subscriptions/listen</code></td><td>change stream</td></tr>
+        <tr><td>Pattern</td><td>MRTR</td><td><code>input_required</code> then retry</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>resultType</h2>
+      <table>
+        <tr><td><code>complete</code></td><td>Done. Older omit ⇒ treat as complete.</td></tr>
+        <tr><td><code>input_required</code></td><td>Collect <code>inputRequests</code>, echo <code>requestState</code>, retry with a <b>new</b> JSON-RPC id.</td></tr>
+      </table>
+      <h2 style="margin-top:6px">Transports</h2>
+      <table>
+        <tr><td><b>stdio</b></td><td>Local process, one client</td></tr>
+        <tr><td><b>Streamable HTTP</b></td><td>Remote POST. No session id. No Last-Event-ID resume.</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Security</h2>
+      <ol>
+        <li>Consent before tool calls and data exposure.</li>
+        <li>Treat tool annotations as untrusted unless you trust the server.</li>
+        <li>Integrity-protect <code>requestState</code> if it affects auth (HMAC/AEAD).</li>
+        <li>Validate <code>iss</code> when present. Prefer Client ID Metadata Documents over DCR.</li>
+        <li>Host keeps history. Servers stay isolated.</li>
+      </ol>
+    </section>
+
+    <section class="wide">
+      <h2>2026-07-28 breaks (vs 2025-11-25)</h2>
+      <ul>
+        <li>No <code>initialize</code> / <code>notifications/initialized</code>. No <code>Mcp-Session-Id</code>.</li>
+        <li><code>server/discover</code> is required. Every request carries version + capabilities in <code>_meta</code>.</li>
+        <li>MRTR replaces server-initiated requests. <code>subscriptions/listen</code> replaces old subscribe/GET notify.</li>
+        <li>Tasks left core → extension <code>io.modelcontextprotocol/tasks</code>.</li>
+        <li>Deprecated: Roots, Sampling, Logging, HTTP+SSE. Broken streams ⇒ re-issue with a new id.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Extensions (opt-in)</h2>
+      <ul>
+        <li><code>io.modelcontextprotocol/tasks</code></li>
+        <li>MCP Apps / UI</li>
+        <li>Auth extensions (client credentials, enterprise-managed)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>First Inspector sequence</h2>
+      <ol>
+        <li><code>server/discover</code></li>
+        <li>list tools/resources/prompts</li>
+        <li>one read-only call</li>
+        <li>optional <code>subscriptions/listen</code></li>
+      </ol>
+    </section>
+  </div>
+
+  <footer>
+    <span>Study material only. Not official MCP docs. See <a href="./disclaimer.md">disclaimer.md</a>.</span>
+    <span>aaronmeis.github.io/learn-mcp</span>
+  </footer>
+</main>
+</body>
+</html>
