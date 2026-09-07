@@ -303,10 +303,12 @@ a { color: var(--teal); }
 .showcase-grid {
   display: grid; gap: 14px;
   grid-template-columns: 1fr 1fr;
+  align-items: start; /* do not stretch row twins when one card expands */
 }
 .showcase-item {
   background: rgba(7,11,20,.55); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 14px 14px 12px; min-width: 0;
+  height: auto; align-self: start;
 }
 .showcase-item.top { border-left: 3px solid var(--amber); }
 .showcase-item.classic { border-left: 3px solid var(--teal); }
@@ -1155,6 +1157,21 @@ const SHOWCASE_CLASSIC = [
 
 document.getElementById("showcaseTop").innerHTML = SHOWCASE_TOP.map((item) => showcaseCard(item, "top")).join("");
 document.getElementById("showcaseClassic").innerHTML = SHOWCASE_CLASSIC.map((item) => showcaseCard(item, "classic")).join("");
+
+function bindShowcaseAccordions(root) {
+  if (!root) return;
+  root.querySelectorAll(".showcase-item").forEach((card) => {
+    card.querySelectorAll("details.sc-box").forEach((d) => {
+      d.addEventListener("toggle", () => {
+        if (!d.open) return;
+        card.querySelectorAll("details.sc-box").forEach((other) => {
+          if (other !== d) other.open = false;
+        });
+      });
+    });
+  });
+}
+bindShowcaseAccordions(document.getElementById("showcase"));
 
 /* === SHORTS CAROUSEL === */
 let shortItems = [];
