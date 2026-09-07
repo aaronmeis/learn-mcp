@@ -1,0 +1,91 @@
+{
+  "title": "MCP Learn — 12 shorts",
+  "ready": 9,
+  "total": 12,
+  "items": [
+    {
+      "id": "01-what-is-mcp",
+      "name": "01-what-is-mcp",
+      "title": "What is MCP",
+      "status": "ready",
+      "file": "media/shorts/01-what-is-mcp.mp4"
+    },
+    {
+      "id": "02-host-client-server",
+      "name": "02-host-client-server",
+      "title": "Host / Client / Server",
+      "status": "ready",
+      "file": "media/shorts/02-host-client-server.mp4"
+    },
+    {
+      "id": "03-primitives",
+      "name": "03-primitives",
+      "title": "Tools / Resources / Prompts",
+      "status": "ready",
+      "file": "media/shorts/03-primitives.mp4"
+    },
+    {
+      "id": "04-transports",
+      "name": "04-transports",
+      "title": "stdio vs Streamable HTTP",
+      "status": "ready",
+      "file": "media/shorts/04-transports.mp4"
+    },
+    {
+      "id": "05-what-broke",
+      "name": "05-what-broke",
+      "title": "What broke in 2026-07-28",
+      "status": "ready",
+      "file": "media/shorts/05-what-broke.mp4"
+    },
+    {
+      "id": "06-stateless-discover",
+      "name": "06-stateless-discover",
+      "title": "Stateless + discover",
+      "status": "pending",
+      "file": "media/shorts/06-stateless-discover.mp4"
+    },
+    {
+      "id": "07-mrtr",
+      "name": "07-mrtr",
+      "title": "MRTR",
+      "status": "pending",
+      "file": "media/shorts/07-mrtr.mp4"
+    },
+    {
+      "id": "08-subscriptions",
+      "name": "08-subscriptions",
+      "title": "subscriptions/listen",
+      "status": "ready",
+      "file": "media/shorts/08-subscriptions.mp4"
+    },
+    {
+      "id": "09-tasks-extension",
+      "name": "09-tasks-extension",
+      "title": "Tasks extension",
+      "status": "ready",
+      "file": "media/shorts/09-tasks-extension.mp4"
+    },
+    {
+      "id": "10-deprecated",
+      "name": "10-deprecated",
+      "title": "Deprecated features",
+      "status": "pending",
+      "file": "media/shorts/10-deprecated.mp4"
+    },
+    {
+      "id": "11-security",
+      "name": "11-security",
+      "title": "Security principles",
+      "status": "ready",
+      "file": "media/shorts/11-security.mp4"
+    },
+    {
+      "id": "12-popular-mcps",
+      "name": "12-popular-mcps",
+      "title": "Popular MCP showcase",
+      "status": "ready",
+      "file": "media/shorts/12-popular-mcps.mp4"
+    }
+  ]
+}

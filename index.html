@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Learn MCP — Sodium Arc Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+/* === SODIUM ARC SPEC — not a cream/orange product site === */
+:root {
+  --ink: #070b14;
+  --ink-2: #0e1626;
+  --panel: #121c2f;
+  --panel-2: #182338;
+  --line: #2a3a55;
+  --paper: #e8e4d9;
+  --muted: #9aa6b8;
+  --amber: #ffb000;
+  --amber-dim: #c48400;
+  --teal: #2ec4b6;
+  --teal-dim: #1a7a72;
+  --coral: #ff5c5c;
+  --ok: #7ddea0;
+  --shadow: 0 18px 50px rgba(0,0,0,.45);
+  --radius: 4px;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  --display: "Syne", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; background: var(--ink); color: var(--paper); font-family: var(--mono); }
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(255,176,0,.12), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(46,196,182,.10), transparent 50%),
+    linear-gradient(180deg, var(--ink), #05080f 60%, var(--ink));
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; opacity: .22;
+  background-image:
+    linear-gradient(rgba(46,196,182,.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,196,182,.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
+}
+.app { position: relative; max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+.top {
+  display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end;
+  border-bottom: 2px solid var(--amber); padding-bottom: 18px; margin-bottom: 22px;
+}
+.brand-kicker {
+  font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--teal);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: var(--display); font-weight: 800; font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.05; margin: 0; letter-spacing: -.02em;
+}
+h1 span { color: var(--amber); }
+.sub { color: var(--muted); margin-top: 10px; font-size: 13px; max-width: 52ch; line-height: 1.55; }
+.pin {
+  border: 1px solid var(--line); background: var(--panel); padding: 14px 16px; border-radius: var(--radius);
+  box-shadow: var(--shadow); min-width: 210px;
+}
+.pin strong { display: block; color: var(--amber); font-family: var(--display); font-size: 18px; }
+.pin small { color: var(--muted); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+
+nav.tabs {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 24px;
+}
+nav.tabs button {
+  font-family: var(--mono); font-size: 12px; letter-spacing: .04em;
+  background: transparent; color: var(--muted); border: 1px solid var(--line);
+  padding: 9px 12px; border-radius: 999px; cursor: pointer;
+}
+nav.tabs button:hover { color: var(--paper); border-color: var(--teal); }
+nav.tabs button.active {
+  color: var(--ink); background: var(--amber); border-color: var(--amber); font-weight: 600;
+}
+
+.panel {
+  display: none; background: linear-gradient(160deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--line); border-radius: 6px; padding: 22px; box-shadow: var(--shadow);
+}
+.panel.active { display: block; animation: rise .35s ease; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .panel.active { animation: none; }
+}
+
+h2 { font-family: var(--display); font-size: 26px; margin: 0 0 14px; }
+h3 { font-family: var(--display); font-size: 18px; margin: 22px 0 10px; color: var(--teal); }
+p, li { line-height: 1.55; color: var(--paper); font-size: 13.5px; }
+.muted { color: var(--muted); }
+.grid { display: grid; gap: 14px; }
+.grid.cards { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.card {
+  background: rgba(7,11,20,.55); border: 1px solid var(--line); border-left: 3px solid var(--teal);
+  padding: 14px; border-radius: var(--radius);
+}
+.card.amber { border-left-color: var(--amber); }
+.card.coral { border-left-color: var(--coral); }
+.card .label { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.card .value { font-family: var(--display); font-size: 28px; color: var(--amber); }
+.card p { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+
+.progress-lanes { display: grid; gap: 12px; }
+.lane {
+  display: grid; grid-template-columns: 140px 1fr auto; gap: 12px; align-items: center;
+  background: rgba(0,0,0,.25); border: 1px solid var(--line); padding: 10px 12px; border-radius: var(--radius);
+}
+.lane select {
+  background: var(--ink); color: var(--paper); border: 1px solid var(--line); padding: 6px 8px; font-family: var(--mono);
+}
+.bar { height: 8px; background: #0a1020; border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+.bar > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--teal), var(--amber)); }
+
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--teal); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; font-size: 11px; }
+tr:hover td { background: rgba(46,196,182,.05); }
+
+.btn {
+  font-family: var(--mono); cursor: pointer; border: 1px solid var(--amber); background: transparent;
+  color: var(--amber); padding: 9px 14px; border-radius: var(--radius);
+}
+.btn:hover { background: var(--amber); color: var(--ink); }
+.btn.ghost { border-color: var(--line); color: var(--muted); }
+.btn.ghost:hover { border-color: var(--teal); color: var(--paper); background: transparent; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+
+.flash {
+  min-height: 220px; display: grid; place-items: center; text-align: center; padding: 28px;
+  border: 1px dashed var(--line); background: rgba(0,0,0,.28); border-radius: var(--radius); cursor: pointer;
+}
+.flash .q { font-family: var(--display); font-size: 22px; max-width: 40ch; }
+.flash .a { color: var(--teal); font-size: 15px; max-width: 48ch; }
+
+.quiz-q { font-family: var(--display); font-size: 20px; margin-bottom: 12px; }
+.choices label {
+  display: block; margin: 8px 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius);
+  cursor: pointer; background: rgba(0,0,0,.2);
+}
+.choices label:hover { border-color: var(--teal); }
+.feedback { margin-top: 14px; padding: 12px; border-left: 3px solid var(--amber); background: rgba(255,176,0,.08); font-size: 13px; }
+.feedback.ok { border-left-color: var(--ok); background: rgba(125,222,160,.08); }
+.feedback.bad { border-left-color: var(--coral); background: rgba(255,92,92,.08); }
+
+.glossary-search {
+  width: 100%; max-width: 420px; background: var(--ink); border: 1px solid var(--line); color: var(--paper);
+  padding: 10px 12px; font-family: var(--mono); margin-bottom: 14px;
+}
+.term { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.term b { color: var(--amber); }
+
+.prompt {
+  border: 1px solid var(--line); background: rgba(0,0,0,.3); padding: 14px; margin: 12px 0; border-radius: var(--radius);
+  white-space: pre-wrap; font-size: 12px; color: var(--paper);
+}
+.warn {
+  border: 1px solid var(--coral); color: #ffc9c9; background: rgba(255,92,92,.08);
+  padding: 10px 12px; font-size: 12px; margin-bottom: 14px; border-radius: var(--radius);
+}
+
+.change-map { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 8px; align-items: stretch; }
+.change-map .box {
+  padding: 12px; border-radius: var(--radius); border: 1px solid var(--line); font-size: 12px;
+}
+.change-map .old { background: rgba(255,92,92,.08); border-color: #7a3030; }
+.change-map .new { background: rgba(46,196,182,.08); border-color: var(--teal-dim); }
+.change-map .arrow { display: grid; place-items: center; color: var(--amber); font-family: var(--display); font-size: 22px; }
+
+.footer {
+  margin-top: 28px; color: var(--muted); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+a { color: var(--teal); }
+
+.carousel {
+  border: 1px solid var(--line); background: #05080f; border-radius: 6px; overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.carousel video { width: 100%; display: block; max-height: 520px; background: #000; }
+.carousel-cap {
+  padding: 12px 14px; border-top: 1px solid var(--line); font-family: var(--display); font-size: 18px; color: var(--amber);
+}
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 12px; }
+.thumbs button {
+  text-align: left; font-family: var(--mono); font-size: 11px; padding: 10px; border-radius: var(--radius);
+  border: 1px solid var(--line); background: rgba(0,0,0,.35); color: var(--muted); cursor: pointer;
+}
+.thumbs button.active, .thumbs button:hover { border-color: var(--amber); color: var(--paper); }
+.thumbs button.ready { border-left: 3px solid var(--ok); }
+.thumbs button.pending { border-left: 3px solid var(--coral); }
+.tagpill {
+  display: inline-block; font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; color: var(--teal); margin-right: 6px;
+}
+.filter-row select {
+  background: var(--ink); color: var(--paper); border: 1px solid var(--line); padding: 6px 8px; font-family: var(--mono);
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand-kicker">Sodium Arc Spec · Public study console</div>
+      <h1>Learn MCP <span>2026-07-28</span></h1>
+      <p class="sub">A personal study console for the July 2026 Model Context Protocol revision: stateless discovery, MRTR, transports, extensions, and a migration drill. Study material only.</p>
+    </div>
+    <div class="pin">
+      <strong id="overallPct">0%</strong>
+      <small>Self-rated ladder</small>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="dash" class="active">Dashboard</button>
+    <button data-tab="curriculum">Curriculum</button>
+    <button data-tab="progress">Ladders</button>
+    <button data-tab="changes">Change map</button>
+    <button data-tab="cards">Flashcards</button>
+    <button data-tab="quiz">Quiz</button>
+    <button data-tab="glossary">Glossary</button>
+    <button data-tab="showcase">Showcase</button>
+    <button data-tab="shorts">Shorts</button>
+    <button data-tab="prompts">Prompts</button>
+  </nav>
+
+  <section class="panel active" id="dash">
+    <h2>Dashboard</h2>
+    <div class="grid cards">
+      <div class="card amber"><div class="label">Spec pin</div><div class="value">07-28</div><p>modelcontextprotocol.io/specification/2026-07-28</p></div>
+      <div class="card"><div class="label">Duration</div><div class="value">4 wk</div><p>~10 h/week · quiz · NLM audio · Inspector lab</p></div>
+      <div class="card"><div class="label">Quiz bank</div><div class="value" id="quizCount">32</div><p>8 per week · rung-tagged</p></div>
+      <div class="card coral"><div class="label">Heart of track</div><div class="value">Δ</div><p>Stateless · discover · MRTR · Tasks extension</p></div>
+    </div>
+    <h3>This week loop</h3>
+    <ol>
+      <li>Read named primary sources (dated docs, not blog lag).</li>
+      <li>Capture a lesson note under <code>Learning/MCP/lessons/</code>.</li>
+      <li>Drill flashcards + week quiz here.</li>
+      <li>Play one short from the carousel.</li>
+      <li>One lab: MCP Inspector or a local config review.</li>
+    </ol>
+    <p class="muted">Pinned to the public spec at <a href="https://modelcontextprotocol.io/specification/2026-07-28/" style="color:var(--teal)">modelcontextprotocol.io / 2026-07-28</a>. Progress saves in your browser only.</p>
+  </section>
+
+  <section class="panel" id="curriculum">
+    <h2>Four-week curriculum</h2>
+    <table>
+      <thead><tr><th>Week</th><th>Focus</th><th>Labs</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Foundations · host/client/server · primitives · transports</td><td>Architecture diagram · NLM master</td></tr>
+        <tr><td>2</td><td>2026-07-28 breaks · discover · MRTR · subscriptions · deprecations</td><td>Old→new habit table · what's-new slide</td></tr>
+        <tr><td>3</td><td>Security · OAuth/iss · requestState · Tasks/Apps extensions</td><td>Threat cards (stdio + remote)</td></tr>
+        <tr><td>4</td><td>Inspector · Skills vs MCP vs CLI · capstone</td><td>Migration memo · mock review</td></tr>
+      </tbody>
+    </table>
+    <h3>Pillars</h3>
+    <div class="grid cards">
+      <div class="card"><div class="label">A · 35%</div><b>Protocol core</b><p>Actors, RPCs, isolation</p></div>
+      <div class="card amber"><div class="label">B · 30%</div><b>July 2026 changes</b><p>The heart of this track</p></div>
+      <div class="card"><div class="label">C · 20%</div><b>Security &amp; auth</b><p>Consent · iss · state integrity</p></div>
+      <div class="card"><div class="label">D · 15%</div><b>Build &amp; labs</b><p>Inspector · config practice</p></div>
+    </div>
+  </section>
+
+  <section class="panel" id="progress">
+    <h2>100 / 200 / 300 ladders</h2>
+    <p class="muted">Self-rate honestly. Stored locally in this browser only.</p>
+    <div class="progress-lanes" id="lanes"></div>
+  </section>
+
+  <section class="panel" id="changes">
+    <h2>Change map · 2025-11-25 → 2026-07-28</h2>
+    <div class="change-map" id="changeMap"></div>
+  </section>
+
+  <section class="panel" id="cards">
+    <h2>Flashcards</h2>
+    <div class="row">
+      <button class="btn ghost" id="cardPrev">Prev</button>
+      <button class="btn" id="cardFlip">Flip</button>
+      <button class="btn ghost" id="cardNext">Next</button>
+      <span class="muted" id="cardMeta"></span>
+    </div>
+    <div class="flash" id="flash" title="Click to flip"></div>
+  </section>
+
+  <section class="panel" id="quiz">
+    <h2>Quiz</h2>
+    <div class="row">
+      <label class="muted">Week
+        <select id="quizWeek">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+        </select>
+      </label>
+      <button class="btn" id="quizCheck">Check</button>
+      <button class="btn ghost" id="quizNext">Next</button>
+      <span class="muted" id="quizMeta"></span>
+    </div>
+    <div id="quizBox"></div>
+  </section>
+
+  <section class="panel" id="glossary">
+    <h2>Glossary</h2>
+    <input class="glossary-search" id="gSearch" placeholder="Filter terms…" />
+    <div id="gList"></div>
+  </section>
+
+  <section class="panel" id="showcase">
+    <h2>Popular MCP showcase</h2>
+    <p class="muted">Live ranks move. This is a concrete gallery so MCP is not abstract. Source: MCP Toplist composite (Sep 2026) + classic first-install picks.</p>
+    <h3>Top 10 · MCP Toplist</h3>
+    <div class="grid cards" id="showcaseTop"></div>
+    <h3>Classic first installs</h3>
+    <div class="grid cards" id="showcaseClassic"></div>
+    <p class="muted">Ranks move. Treat this as a starting gallery, not a permanent leaderboard.</p>
+  </section>
+
+  <section class="panel" id="shorts">
+    <h2>Shorts carousel</h2>
+    <p class="muted">Twelve short explainers on the 2026-07-28 revision. Pending slots fill as clips finish rendering.</p>
+    <div class="row">
+      <button class="btn ghost" id="shortPrev">Prev</button>
+      <button class="btn" id="shortNext">Next</button>
+      <span class="muted" id="shortMeta"></span>
+    </div>
+    <div class="carousel" id="carousel">
+      <video id="shortVideo" controls playsinline></video>
+      <div class="carousel-cap" id="shortCap">Waiting for downloads…</div>
+    </div>
+    <div class="thumbs" id="shortThumbs"></div>
+  </section>
+
+  <section class="panel" id="prompts">
+    <h2>Prompt library</h2>
+    <div class="warn">Golden rule: never paste API keys, OAuth tokens, cookies, private calendar payloads, or other secrets into any model.</div>
+    <div id="promptList"></div>
+  </section>
+
+  <footer class="footer">
+    <span>Learn MCP · Sodium Arc Spec</span>
+    <span>Spec pin 2026-07-28 · browser-local progress · not official docs</span>
+  </footer>
+</div>
+
+<script>
+/* === DATA (seed; vault quiz-bank / flashcards are source of truth) === */
+const CHANGES = [
+  ["initialize / initialized handshake", "Per-request _meta version + capabilities"],
+  ["Mcp-Session-Id sessions", "server/discover + explicit state handles"],
+  ["Server-initiated elicitation requests", "MRTR InputRequiredResult + client retry"],
+  ["resources subscribe / HTTP GET notify", "subscriptions/listen stream"],
+  ["SSE Last-Event-ID resume · ping · setLevel", "Re-issue failed requests · logLevel in _meta"],
+  ["Core Tasks blocking result", "Extension io.modelcontextprotocol/tasks"],
+];
+
+const LANES = [
+  { id: "a", name: "Protocol core" },
+  { id: "b", name: "2026-07-28 changes" },
+  { id: "c", name: "Security & auth" },
+  { id: "d", name: "Build & labs" },
+];
+
+let CARDS = [
+  { front: "What did 2026-07-28 remove from Streamable HTTP?", back: "Protocol sessions / Mcp-Session-Id. Cross-call state uses explicit handles." },
+  { front: "What replaces initialize?", back: "Every request carries protocolVersion + clientCapabilities in _meta. Optional server/discover." },
+  { front: "What is MRTR?", back: "Multi Round-Trip Requests: server returns resultType input_required; client retries with inputResponses." },
+  { front: "Name the three server primitives.", back: "Tools, Resources, Prompts." },
+  { front: "Which client feature stays first-class?", back: "Elicitation. Sampling, Roots, and Logging are deprecated." },
+  { front: "stdio vs Streamable HTTP?", back: "stdio = local process. Streamable HTTP = remote POST (+ optional streaming), OAuth recommended for user data." },
+  { front: "What is resultType?", back: "Required on results: complete or input_required. Older servers omitting it are treated as complete." },
+  { front: "Where did Tasks go?", back: "Out of core into extension io.modelcontextprotocol/tasks (poll tasks/get, mid-flight tasks/update)." },
+  { front: "How do change notifications work now?", back: "Opt-in subscriptions/listen long-lived POST stream, tagged with subscriptionId." },
+  { front: "ttlMs / cacheScope?", back: "Freshness hint and public/private cache scope on list/read results." },
+  { front: "requestState rule?", back: "Opaque to clients; treat as attacker-controlled; integrity-protect if it affects auth." },
+  { front: "Local Draw.io MCP rule?", back: "Prefer local @drawio/mcp over stdio. Avoid the hosted https://mcp.draw.io/mcp endpoint for private diagrams." },
+];
+
+const QUIZ = [
+  { week:1, rung:100, q:"A host creates how many clients per MCP server?", choices:["Zero or many sharing one connection","Exactly one client per server","One client for all servers","Clients are optional"], answer:1, why:"Each client maintains a dedicated 1:1 connection with one server." },
+  { week:1, rung:100, q:"Which is NOT a server primitive?", choices:["Tools","Resources","Prompts","Sampling"], answer:3, why:"Sampling is a (deprecated) client feature, not a server primitive." },
+  { week:1, rung:200, q:"Which transport fits a same-machine Draw.io MCP?", choices:["Streamable HTTP only","stdio","HTTP+SSE (preferred new)","gRPC"], answer:1, why:"Local process servers typically use stdio." },
+  { week:1, rung:200, q:"MCP message format is based on:", choices:["GraphQL","JSON-RPC 2.0","SOAP","MQTT"], answer:1, why:"The data layer uses JSON-RPC 2.0." },
+  { week:1, rung:100, q:"Who enforces user consent for tool calls?", choices:["The server alone","The host application","The model weights","The registry"], answer:1, why:"Hosts must obtain consent and keep conversation isolation." },
+  { week:1, rung:200, q:"Remote MCP servers typically use:", choices:["Only stdin pipes","Streamable HTTP","FTP","SMB"], answer:1, why:"Streamable HTTP is the remote transport." },
+  { week:1, rung:100, q:"Can a server read the full multi-server conversation?", choices:["Yes, always","No — host keeps history; servers stay isolated","Only with Sampling","Only on stdio"], answer:1, why:"Design principle: servers must not see the whole conversation or peer into other servers." },
+  { week:1, rung:300, q:"Progressive tool discovery matters because:", choices:["JSON-RPC forbids large lists","Federating many servers can overflow model context","stdio cannot list tools","Extensions disable tools"], answer:1, why:"Client best practices recommend not dumping every tool into context at once." },
+  { week:2, rung:100, q:"2026-07-28 removes which handshake?", choices:["TLS","initialize / notifications/initialized","OAuth","DNS"], answer:1, why:"MCP became stateless; initialize handshake was removed." },
+  { week:2, rung:200, q:"Servers MUST implement:", choices:["sampling/createMessage","server/discover","tasks/list (core)","resources/subscribe"], answer:1, why:"server/discover is mandatory to advertise versions and capabilities." },
+  { week:2, rung:200, q:"MRTR interim results use resultType:", choices:["pending","input_required","continue","eliciting"], answer:1, why:"InputRequiredResult uses resultType input_required." },
+  { week:2, rung:200, q:"On MRTR retry, the JSON-RPC id must:", choices:["Reuse the original id","Be a new id","Be omitted","Match subscriptionId"], answer:1, why:"Retry is an independent request with a new id." },
+  { week:2, rung:100, q:"Tasks in 2026-07-28 live in:", choices:["Core protocol only","An official extension","stdio headers","The host LLM"], answer:1, why:"Tasks moved to io.modelcontextprotocol/tasks." },
+  { week:2, rung:300, q:"Broken Streamable HTTP response streams:", choices:["Resume with Last-Event-ID","Must be re-issued as a new request","Auto-retry with same id forever","Convert to stdio"], answer:1, why:"SSE resumability was removed; clients re-issue with a new request id." },
+  { week:2, rung:200, q:"Change notifications are delivered via:", choices:["resources/subscribe","subscriptions/listen","ping floods","initialize"], answer:1, why:"subscriptions/listen is the opt-in change stream." },
+  { week:2, rung:100, q:"Which feature is deprecated as of 2026-07-28?", choices:["Tools","Elicitation","Sampling","Prompts"], answer:2, why:"Roots, Sampling, and Logging are deprecated." },
+  { week:3, rung:100, q:"Tool annotations should be treated as:", choices:["Always trusted","Untrusted unless the server is trusted","Equivalent to code signatures","Ignored"], answer:1, why:"Spec security guidance: treat annotations cautiously." },
+  { week:3, rung:200, q:"When iss is present in auth responses, clients MUST:", choices:["Ignore it","Validate against the recorded issuer","Log it only","Strip it"], answer:1, why:"SEP-2468 / auth guidance: validate iss before redeeming codes." },
+  { week:3, rung:200, q:"requestState that affects authorization should be:", choices:["Plain JSON anyone can edit","Integrity-protected (e.g. HMAC/AEAD)","Stored only in localStorage","Printed in tool titles"], answer:1, why:"MRTR security: treat requestState as attacker-controlled." },
+  { week:3, rung:100, q:"Extensions are:", choices:["Always on","Opt-in on both sides","Server-forced","Host-forbidden"], answer:1, why:"Extensions require explicit capability negotiation." },
+  { week:3, rung:300, q:"Prefer Client ID Metadata Documents over:", choices:["OAuth entirely","Dynamic Client Registration (RFC7591)","stdio","JSON-RPC"], answer:1, why:"DCR is deprecated in favor of Client ID Metadata Documents." },
+  { week:3, rung:200, q:"MCP Apps provide:", choices:["Kernel modules","Inline interactive UI in the host","Replacement for tools","Only PDF export"], answer:1, why:"Apps extension renders UI inside conversations." },
+  { week:3, rung:100, q:"Hosts should obtain consent before:", choices:["Reading the changelog","Invoking tools / exposing user data to servers","Opening the SPA","Creating flashcards"], answer:1, why:"Consent and control are key security principles." },
+  { week:3, rung:200, q:"Per-request log level uses _meta key:", choices:["debug","io.modelcontextprotocol/logLevel","log.set","Mcp-Log"], answer:1, why:"logging/setLevel was removed; logLevel is per-request _meta." },
+  { week:4, rung:200, q:"MCP Inspector is primarily for:", choices:["Training models","Testing/debugging MCP servers","Replacing OAuth","Hosting Apps"], answer:1, why:"Inspector is the developer tooling for MCP servers." },
+  { week:4, rung:100, q:"Skills vs MCP: skills are:", choices:["Live JSON-RPC endpoints","Markdown playbooks agents load","OAuth issuers","Transport layers"], answer:1, why:"Skills teach workflows in markdown; MCP attaches live tools over the protocol." },
+  { week:4, rung:300, q:"Deterministic tools/list order helps:", choices:["GPU clocks","Client caching / prompt-cache hit rates","DNS TTLs","Canvas layout"], answer:1, why:"Servers SHOULD return tools in deterministic order." },
+  { week:4, rung:200, q:"A safe first Inspector sequence is:", choices:["delete all tools","discover → list → one read-only call","disable consent","paste secrets into _meta"], answer:1, why:"Discover capabilities, list, then call carefully." },
+  { week:4, rung:100, q:"CLI wrappers often exist because:", choices:["MCP cannot call HTTP","Some APIs are wrapped in terminal scripts without MCP","stdio is illegal","Browsers forbid MCP"], answer:1, why:"Teams often keep thin CLI wrappers beside MCP servers for the same APIs." },
+  { week:4, rung:300, q:"Capstone migration memo should cover:", choices:["Only fonts","Breaks vs 2025-11-25 and dual-stack plan","Vacation schedules","Slide credit math"], answer:1, why:"Week-4 ask: migrate off sessions/initialize with a concrete plan." },
+  { week:4, rung:200, q:"Registry is for:", choices:["Publishing/discovering MCP servers","Storing API keys in git","Replacing JSON-RPC","Disabling consent"], answer:1, why:"MCP Registry publishes and discovers servers." },
+  { week:4, rung:100, q:"Good practice for diagram exports in notes:", choices:["Commit every full PNG into chat history","Keep thumbnails in notes; store heavy files outside","Upload private diagrams to a public cloud MCP","Email the XML secrets"], answer:1, why:"Keep large binaries out of notebooks; link or thumbnail instead." },
+];
+
+const GLOSSARY = [
+  ["Host","AI application that creates clients and enforces consent"],
+  ["Client","Connector inside the host; 1:1 with a server"],
+  ["Server","Process/service exposing tools, resources, prompts"],
+  ["Tool","Callable function (tools/list, tools/call)"],
+  ["Resource","Contextual data (resources/list, resources/read)"],
+  ["Prompt","Templated workflow (prompts/list, prompts/get)"],
+  ["Elicitation","Server asks user for input via MRTR"],
+  ["Sampling","Deprecated client LLM-completion feature"],
+  ["Roots","Deprecated workspace-root listing feature"],
+  ["Logging","Deprecated protocol log-to-client feature"],
+  ["stdio","Local stdin/stdout transport"],
+  ["Streamable HTTP","Remote HTTP POST transport (+ optional streaming)"],
+  ["server/discover","Mandatory RPC for versions, capabilities, identity"],
+  ["_meta","Per-request/result metadata bag"],
+  ["resultType","complete | input_required"],
+  ["MRTR","Multi Round-Trip Requests pattern"],
+  ["InputRequiredResult","Interim result carrying inputRequests + requestState"],
+  ["requestState","Opaque server state echoed on MRTR retry"],
+  ["subscriptions/listen","Opt-in change-notification stream"],
+  ["ttlMs","Cache freshness hint in milliseconds"],
+  ["cacheScope","public or private caching hint"],
+  ["Tasks extension","Async durable handles outside core"],
+  ["MCP Apps","Interactive UI inside host conversations"],
+  ["SEP","Specification Enhancement Proposal"],
+  ["Feature lifecycle","Active → Deprecated (≥12 months) → Removed"],
+];
+
+const PROMPTS = [
+  { title: "Briefing", body: "Using only public MCP 2026-07-28 docs, brief me as an agent builder: host/client/server, three primitives, and why the protocol is now Stateless. No secrets." },
+  { title: "Socratic examiner", body: "Quiz me at rung 200 on MRTR. Ask one question at a time. Wait for my answer. Then grade against the 2026-07-28 MRTR pattern and cite the spec path." },
+  { title: "Migration drill", body: "I maintain a fictional host still using initialize and Mcp-Session-Id. Produce an old-habit → new-habit table for every major 2026-07-28 break. Public spec only." },
+  { title: "Security review", body: "Review a fictional remote MCP weather server. List consent UX, tool-annotation trust, OAuth iss validation, and requestState integrity checks. Do not invent vulnerabilities that need exploit code." },
+  { title: "Skills vs MCP lab", body: "Help me decide Skills vs MCP vs a thin CLI wrapper for a calendar-summarize workflow. Ask clarifying questions first. Never request real tokens." },
+];
+
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+};
+
+/* === TABS === */
+const tabs = document.getElementById("tabs");
+tabs.addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-tab]");
+  if (!btn) return;
+  tabs.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === btn.dataset.tab));
+});
+
+/* === LANES === */
+function rungToPct(r) { return ({ "0":0, "100":34, "200":67, "300":100 })[r] ?? 0; }
+function renderLanes() {
+  const ratings = store.get("mcp.lanes", {});
+  const root = document.getElementById("lanes");
+  root.innerHTML = "";
+  let sum = 0;
+  LANES.forEach(l => {
+    const val = ratings[l.id] || "0";
+    sum += rungToPct(val);
+    const row = document.createElement("div");
+    row.className = "lane";
+    row.innerHTML = `<div>${l.name}</div><div class="bar"><i style="width:${rungToPct(val)}%"></i></div>`;
+    const sel = document.createElement("select");
+    ["0","100","200","300"].forEach(o => {
+      const opt = document.createElement("option"); opt.value = o; opt.textContent = o === "0" ? "—" : o; if (o === val) opt.selected = true; sel.appendChild(opt);
+    });
+    sel.addEventListener("change", () => {
+      ratings[l.id] = sel.value; store.set("mcp.lanes", ratings); renderLanes();
+    });
+    row.appendChild(sel); root.appendChild(row);
+  });
+  document.getElementById("overallPct").textContent = Math.round(sum / LANES.length) + "%";
+}
+renderLanes();
+
+/* === CHANGE MAP === */
+document.getElementById("changeMap").innerHTML = CHANGES.map(([o,n]) =>
+  `<div class="box old"><b>Was</b><br>${o}</div><div class="arrow">→</div><div class="box new"><b>Now</b><br>${n}</div>`
+).join("");
+
+/* === CARDS === */
+let cardI = 0, showA = false;
+function renderCard() {
+  const c = CARDS[cardI];
+  const el = document.getElementById("flash");
+  el.innerHTML = showA ? `<div class="a">${c.back}</div>` : `<div class="q">${c.front}</div>`;
+  document.getElementById("cardMeta").textContent = `${cardI+1} / ${CARDS.length}`;
+}
+document.getElementById("flash").onclick = () => { showA = !showA; renderCard(); };
+document.getElementById("cardFlip").onclick = () => { showA = !showA; renderCard(); };
+document.getElementById("cardPrev").onclick = () => { cardI = (cardI - 1 + CARDS.length) % CARDS.length; showA = false; renderCard(); };
+document.getElementById("cardNext").onclick = () => { cardI = (cardI + 1) % CARDS.length; showA = false; renderCard(); };
+renderCard();
+
+/* === QUIZ === */
+let quizI = 0;
+function weekQuiz() {
+  const w = Number(document.getElementById("quizWeek").value);
+  return QUIZ.filter(q => q.week === w);
+}
+function renderQuiz() {
+  const list = weekQuiz();
+  if (!list.length) return;
+  quizI = Math.min(quizI, list.length - 1);
+  const item = list[quizI];
+  document.getElementById("quizMeta").textContent = `Q ${quizI+1}/${list.length} · rung ${item.rung}`;
+  document.getElementById("quizCount").textContent = String(QUIZ.length);
+  const box = document.getElementById("quizBox");
+  box.innerHTML = `<div class="quiz-q">${item.q}</div><div class="choices" id="choices"></div><div id="feedback"></div>`;
+  const ch = document.getElementById("choices");
+  item.choices.forEach((c, idx) => {
+    const lab = document.createElement("label");
+    lab.innerHTML = `<input type="radio" name="ans" value="${idx}" /> ${c}`;
+    ch.appendChild(lab);
+  });
+}
+document.getElementById("quizWeek").onchange = () => { quizI = 0; renderQuiz(); };
+document.getElementById("quizNext").onclick = () => { quizI = (quizI + 1) % weekQuiz().length; renderQuiz(); };
+document.getElementById("quizCheck").onclick = () => {
+  const list = weekQuiz(); const item = list[quizI];
+  const picked = document.querySelector('input[name="ans"]:checked');
+  const fb = document.getElementById("feedback");
+  if (!picked) { fb.className = "feedback bad"; fb.textContent = "Pick an answer first."; return; }
+  const ok = Number(picked.value) === item.answer;
+  fb.className = "feedback " + (ok ? "ok" : "bad");
+  fb.innerHTML = `<b>${ok ? "Correct" : "Not quite"}.</b> ${item.why}`;
+};
+renderQuiz();
+
+/* === GLOSSARY === */
+function renderGlossary() {
+  const q = (document.getElementById("gSearch").value || "").toLowerCase();
+  const list = GLOSSARY.filter(([t,d]) => !q || t.toLowerCase().includes(q) || d.toLowerCase().includes(q));
+  document.getElementById("gList").innerHTML = list.map(([t,d]) => `<div class="term"><b>${t}</b> — ${d}</div>`).join("");
+}
+document.getElementById("gSearch").oninput = renderGlossary;
+renderGlossary();
+
+/* === PROMPTS === */
+document.getElementById("promptList").innerHTML = PROMPTS.map(p =>
+  `<h3>${p.title}</h3><div class="prompt">${p.body}</div>`
+).join("");
+
+/* === SHOWCASE === */
+const SHOWCASE_TOP = [
+  ["1", "Assistant UI", "~12k★", "Chat/UI primitives as MCP"],
+  ["2", "Chrome DevTools MCP", "~51k★", "Browser debugging for agents"],
+  ["3", "Browser Use", "~112k★", "Browser automation MCP"],
+  ["4", "ComfyUI MCP", "~0.7k★", "Image/comfy workflows"],
+  ["5", "MarkItDown", "~178k★", "Docs → markdown (Microsoft)"],
+  ["6", "HA MCP", "~4.6k★", "Home Assistant control"],
+  ["7", "Context7", "~62k★", "Version-specific library docs"],
+  ["8", "Scrapling MCP", "~79k★", "Scraping / extraction"],
+  ["9", "n8n-MCP", "~23k★", "Workflow automation bridge"],
+  ["10", "Codebase Memory", "~42k★", "Codebase retrieval memory"],
+];
+const SHOWCASE_CLASSIC = [
+  ["GitHub", "Repos · PRs · issues · Actions", "Remote / OAuth"],
+  ["Playwright", "Browser automation & testing", "Often stdio"],
+  ["Filesystem", "Scoped local read/write", "stdio"],
+  ["Context7", "Up-to-date library docs", "Remote"],
+  ["Fetch", "URL → clean content", "stdio"],
+  ["Firecrawl", "Web research scrape/map", "Remote"],
+  ["Notion / Slack / Drive", "Knowledge & collab", "Remote OAuth"],
+  ["PostgreSQL / Supabase", "NL → database", "Local/remote"],
+];
+document.getElementById("showcaseTop").innerHTML = SHOWCASE_TOP.map(([r,n,s,w]) =>
+  `<div class="card amber"><div class="label">Rank ${r} · ${s}</div><b>${n}</b><p>${w}</p></div>`
+).join("");
+document.getElementById("showcaseClassic").innerHTML = SHOWCASE_CLASSIC.map(([n,j,t]) =>
+  `<div class="card"><div class="label">${t}</div><b>${n}</b><p>${j}</p></div>`
+).join("");
+
+/* === SHORTS CAROUSEL === */
+let shortItems = [];
+let shortI = 0;
+async function loadShorts() {
+  try {
+    const res = await fetch("shorts-catalog.json?ts=" + Date.now());
+    const data = await res.json();
+    shortItems = data.items || [];
+  } catch {
+    shortItems = [];
+  }
+  // Probe which mp4s exist by trying HEAD is blocked for file; use catalog status
+  renderShorts();
+}
+function renderShorts() {
+  const thumbs = document.getElementById("shortThumbs");
+  if (!shortItems.length) {
+    thumbs.innerHTML = `<p class="muted">No catalog yet. Shorts appear here when media is published.</p>`;
+    return;
+  }
+  thumbs.innerHTML = shortItems.map((it, idx) =>
+    `<button type="button" class="${idx===shortI?"active":""} ${it.status==="ready"?"ready":"pending"}" data-i="${idx}">${it.title || it.name}<br><span class="tagpill">${it.status || "pending"}</span></button>`
+  ).join("");
+  thumbs.querySelectorAll("button").forEach(b => b.onclick = () => { shortI = Number(b.dataset.i); showShort(); });
+  showShort();
+}
+function showShort() {
+  const it = shortItems[shortI];
+  if (!it) return;
+  const v = document.getElementById("shortVideo");
+  const src = it.file || (`media/shorts/${it.name}.mp4`);
+  if (v.getAttribute("src") !== src) {
+    v.src = src;
+  }
+  document.getElementById("shortCap").textContent = `${it.title || it.name}`;
+  document.getElementById("shortMeta").textContent = `${shortI+1} / ${shortItems.length} · ${it.status || "?"}`;
+  document.querySelectorAll("#shortThumbs button").forEach((b, idx) => b.classList.toggle("active", idx === shortI));
+}
+document.getElementById("shortPrev").onclick = () => { if (!shortItems.length) return; shortI = (shortI - 1 + shortItems.length) % shortItems.length; showShort(); };
+document.getElementById("shortNext").onclick = () => { if (!shortItems.length) return; shortI = (shortI + 1) % shortItems.length; showShort(); };
+loadShorts();
+
+/* === LOAD EXTERNAL FLASHCARDS (200+) === */
+(async function loadCards() {
+  try {
+    const res = await fetch("cards-data.json?ts=" + Date.now());
+    const data = await res.json();
+    const arr = Array.isArray(data) ? data : (data.cards || []);
+    if (arr.length >= 50) {
+      CARDS = arr.map(c => ({ front: c.front, back: c.back, tag: c.tag }));
+      cardI = 0; showA = false; renderCard();
+      let metaExtra = document.getElementById("cardLoadNote");
+      if (!metaExtra) {
+        metaExtra = document.createElement("p");
+        metaExtra.id = "cardLoadNote";
+        metaExtra.className = "muted";
+        document.getElementById("cards").insertBefore(metaExtra, document.getElementById("cards").children[1]);
+      }
+      metaExtra.textContent = `Loaded ${CARDS.length} flashcards from cards-data.json`;
+    }
+  } catch (e) {
+    console.warn("cards-data.json not ready yet", e);
+  }
+})();
+</script>
+</body>
+</html>

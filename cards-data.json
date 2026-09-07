@@ -1,0 +1,1546 @@
+{
+  "title": "MCP Learn flashcards",
+  "count": 220,
+  "cards": [
+    {
+      "id": "terms-001",
+      "front": "What is MCP?",
+      "back": "Model Context Protocol: open JSON-RPC protocol connecting AI hosts to tools and context.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-002",
+      "front": "What is a Host?",
+      "back": "The AI application that creates clients, enforces consent, and talks to the LLM.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-003",
+      "front": "What is a Client?",
+      "back": "A connector inside the host with a dedicated 1:1 link to one MCP server.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-004",
+      "front": "What is a Server?",
+      "back": "A local or remote program that exposes tools, resources, and/or prompts.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-005",
+      "front": "Name the three server primitives.",
+      "back": "Tools, Resources, Prompts.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-006",
+      "front": "What does tools/list do?",
+      "back": "Discovers tool metadata (name, title, description, inputSchema).",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-007",
+      "front": "What does tools/call do?",
+      "back": "Invokes a named tool with arguments.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-008",
+      "front": "What does resources/read do?",
+      "back": "Returns contextual data for a resource URI.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-009",
+      "front": "What does prompts/get do?",
+      "back": "Fetches a parameterized prompt template.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-010",
+      "front": "What is Elicitation?",
+      "back": "Client capability letting a server request additional user input (via MRTR).",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-011",
+      "front": "What transport is typical for local servers?",
+      "back": "stdio (stdin/stdout).",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-012",
+      "front": "What transport is typical for remote servers?",
+      "back": "Streamable HTTP.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-013",
+      "front": "What message format does MCP use?",
+      "back": "JSON-RPC 2.0.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-014",
+      "front": "What is _meta?",
+      "back": "Per-request or per-result metadata bag for version, capabilities, identity, etc.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-015",
+      "front": "What is protocolVersion in _meta?",
+      "back": "Declares the MCP version the client is speaking on that request (e.g. 2026-07-28).",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-016",
+      "front": "What is clientCapabilities?",
+      "back": "Features the client supports, declared on every request in _meta.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-017",
+      "front": "What is clientInfo?",
+      "back": "Optional identity (name/version) clients SHOULD send in _meta.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-018",
+      "front": "What is serverInfo?",
+      "back": "Identity servers SHOULD return in result _meta.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-019",
+      "front": "What is resultType?",
+      "back": "Required field: complete or input_required.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-020",
+      "front": "What is ttlMs?",
+      "back": "Cache freshness hint in milliseconds on list/read results.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-021",
+      "front": "What is cacheScope?",
+      "back": "public or private caching hint for intermediaries.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-022",
+      "front": "What is server/discover?",
+      "back": "Mandatory RPC advertising supportedVersions, capabilities, and identity.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-023",
+      "front": "Can one client talk to two servers?",
+      "back": "No. One client maintains one dedicated server connection.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-024",
+      "front": "Who keeps conversation history?",
+      "back": "The host. Servers must not read the whole conversation.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-025",
+      "front": "What is progressive tool discovery?",
+      "back": "Loading tools incrementally across many servers instead of dumping all into context.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-026",
+      "front": "What are tool annotations?",
+      "back": "Descriptions of tool behavior; treat as untrusted unless the server is trusted.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-027",
+      "front": "What is content in a tool result?",
+      "back": "An array of content objects (text, images, resources, etc.).",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-028",
+      "front": "What is inputSchema?",
+      "back": "JSON Schema describing tool arguments.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-029",
+      "front": "Should tools/list order be stable?",
+      "back": "Yes. Servers SHOULD return tools in deterministic order for caching.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-030",
+      "front": "What is a Resource URI?",
+      "back": "Stable identifier for contextual data a client can read.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-031",
+      "front": "What is a Prompt template?",
+      "back": "Reusable parameterized message/workflow from a server.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-032",
+      "front": "What is Streamable HTTP POST used for?",
+      "back": "Client-to-server JSON-RPC messages (with optional streaming response).",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-033",
+      "front": "What headers are required on Streamable HTTP?",
+      "back": "Among others: Mcp-Method and Mcp-Name (SEP-2243).",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-034",
+      "front": "What is x-mcp-header?",
+      "back": "Mechanism to pass custom HTTP headers from tool parameters.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-035",
+      "front": "What is UnsupportedProtocolVersionError?",
+      "back": "Returned when requested protocolVersion is not supported.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-036",
+      "front": "What is Feature lifecycle?",
+      "back": "Active then Deprecated (at least 12 months) then Removed.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-037",
+      "front": "What is a SEP?",
+      "back": "Specification Enhancement Proposal.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-038",
+      "front": "What is an Extension?",
+      "back": "Opt-in capability beyond core, negotiated in capabilities.extensions.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-039",
+      "front": "Official extension vendor prefix?",
+      "back": "io.modelcontextprotocol/...",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-040",
+      "front": "What is MCP Apps?",
+      "back": "Extension for interactive UI rendered inside host conversations.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-041",
+      "front": "What is Tasks extension id?",
+      "back": "io.modelcontextprotocol/tasks",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-042",
+      "front": "What is sampling/createMessage?",
+      "back": "Deprecated client feature for server-requested LLM completions.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-043",
+      "front": "What is roots/list?",
+      "back": "Deprecated client feature listing workspace roots.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-044",
+      "front": "What replaced logging/setLevel?",
+      "back": "Per-request io.modelcontextprotocol/logLevel in _meta.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-045",
+      "front": "Where should new servers log?",
+      "back": "stderr (stdio) or OpenTelemetry, not protocol Logging.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-046",
+      "front": "What is Pagination cursor?",
+      "back": "Optional cursor parameter on list methods for paging.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-047",
+      "front": "What is JSON Schema dialect default direction?",
+      "back": "JSON Schema 2020-12 for tool schemas (SEP-2106 direction).",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "terms-048",
+      "front": "What is OpenTelemetry in _meta?",
+      "back": "traceparent, tracestate, baggage keys for trace context.",
+      "tag": "terms",
+      "rung": "300"
+    },
+    {
+      "id": "terms-049",
+      "front": "What is the Registry?",
+      "back": "Official catalog for publishing/discovering MCP servers.",
+      "tag": "terms",
+      "rung": "100"
+    },
+    {
+      "id": "terms-050",
+      "front": "What is Inspector?",
+      "back": "Developer tooling to test and debug MCP servers.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "changes-001",
+      "front": "What handshake did 2026-07-28 remove?",
+      "back": "initialize / notifications/initialized.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-002",
+      "front": "What session header was removed?",
+      "back": "Mcp-Session-Id from Streamable HTTP.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-003",
+      "front": "How is cross-call state kept now?",
+      "back": "Explicit server-minted handles passed as ordinary tool arguments.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-004",
+      "front": "Is MCP stateful at the protocol level in 2026-07-28?",
+      "back": "No. It is designed as a Stateless protocol.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-005",
+      "front": "What must every request carry?",
+      "back": "protocolVersion and clientCapabilities in _meta.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-006",
+      "front": "What RPC must every server implement for discovery?",
+      "back": "server/discover.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-007",
+      "front": "What replaced resources/subscribe?",
+      "back": "subscriptions/listen.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-008",
+      "front": "What replaced HTTP GET notify endpoint?",
+      "back": "subscriptions/listen long-lived POST response stream.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-009",
+      "front": "Where do progress notifications flow?",
+      "back": "On the response stream of the related request, not subscriptions/listen.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-010",
+      "front": "Was ping removed?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-011",
+      "front": "Was logging/setLevel removed?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-012",
+      "front": "Was notifications/roots/list_changed removed?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-013",
+      "front": "Where did Tasks move?",
+      "back": "Out of core into extension io.modelcontextprotocol/tasks.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-014",
+      "front": "What replaces blocking tasks/result?",
+      "back": "Polling via tasks/get (and tasks/update for mid-flight input).",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-015",
+      "front": "Was tasks/list kept in the Tasks redesign?",
+      "back": "No. tasks/list was removed in the extension redesign.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-016",
+      "front": "What is MRTR?",
+      "back": "Multi Round-Trip Requests pattern.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-017",
+      "front": "What resultType signals more input is needed?",
+      "back": "input_required.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-018",
+      "front": "What object carries server-to-client asks in MRTR?",
+      "back": "inputRequests inside InputRequiredResult.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-019",
+      "front": "What must clients echo on MRTR retry?",
+      "back": "requestState exactly, if present.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-020",
+      "front": "Must MRTR retry reuse the same JSON-RPC id?",
+      "back": "No. It must use a new id.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-021",
+      "front": "Which client methods may return InputRequiredResult?",
+      "back": "tools/call, resources/read, prompts/get.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-022",
+      "front": "What replaced freestanding server-initiated elicitation requests?",
+      "back": "MRTR InputRequiredResult pattern.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-023",
+      "front": "Was SSE Last-Event-ID resumability kept?",
+      "back": "No. It was removed.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-024",
+      "front": "What must clients do if a response stream breaks?",
+      "back": "Re-issue as a new request with a new id.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-025",
+      "front": "What field is now required on all results?",
+      "back": "resultType.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-026",
+      "front": "How treat older results missing resultType?",
+      "back": "Treat as complete.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-027",
+      "front": "What caching fields were added to list/read results?",
+      "back": "ttlMs and cacheScope.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-028",
+      "front": "What error code for resource not found now?",
+      "back": "-32602 Invalid Params (was -32002).",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-029",
+      "front": "What auth response parameter SHOULD be included and validated?",
+      "back": "iss (issuer), per RFC 9207 guidance.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-030",
+      "front": "What client registration approach is preferred over DCR?",
+      "back": "Client ID Metadata Documents.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-031",
+      "front": "Is OAuth DCR deprecated?",
+      "back": "Yes, in favor of Client ID Metadata Documents.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-032",
+      "front": "Are Roots deprecated in 2026-07-28?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-033",
+      "front": "Is Sampling deprecated?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-034",
+      "front": "Is Logging deprecated?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-035",
+      "front": "Is HTTP+SSE deprecated?",
+      "back": "Yes. Migrate to Streamable HTTP.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-036",
+      "front": "What includeContext values are deprecated?",
+      "back": "thisServer and allServers.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-037",
+      "front": "Name SEP for Stateless MCP.",
+      "back": "SEP-2575.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-038",
+      "front": "Name SEP for sessionless / handles.",
+      "back": "SEP-2567.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-039",
+      "front": "Name SEP for MRTR.",
+      "back": "SEP-2322.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-040",
+      "front": "Name SEP for Tasks extension move.",
+      "back": "SEP-2663.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-041",
+      "front": "Name SEP deprecating Roots/Sampling/Logging.",
+      "back": "SEP-2577.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-042",
+      "front": "Name SEP for feature lifecycle policy.",
+      "back": "SEP-2596.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-043",
+      "front": "What is subscriptions/listen?",
+      "back": "Opt-in long-lived stream for change notifications.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-044",
+      "front": "What tags subscription notifications?",
+      "back": "io.modelcontextprotocol/subscriptionId in _meta.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-045",
+      "front": "Do list endpoints vary per connection now?",
+      "back": "No. They no longer vary per-connection.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-046",
+      "front": "Can servers return task handles unsolicited in the extension?",
+      "back": "Yes, without per-request opt-in (per redesign notes).",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-047",
+      "front": "What is InputRequiredResult.requestState?",
+      "back": "Opaque server-only state; clients must not parse it.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-048",
+      "front": "Why protect requestState?",
+      "back": "It passes through the client and may be attacker-controlled.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-049",
+      "front": "What methods belong in inputRequests?",
+      "back": "elicitation/create, sampling/createMessage, roots/list (latter two deprecated features).",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-050",
+      "front": "Must servers ask only for declared client capabilities?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-051",
+      "front": "What is notifications/subscriptions/acknowledged?",
+      "back": "First message acknowledging a subscriptions/listen filter.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-052",
+      "front": "What happened to elicitation complete notifications from 2025-11-25?",
+      "back": "Removed under MRTR; correlate via requestState if needed.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-053",
+      "front": "Should tools/list be deterministic?",
+      "back": "Yes, to improve client/prompt cache hits.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-054",
+      "front": "What capability field advertises extensions?",
+      "back": "extensions on ClientCapabilities and ServerCapabilities.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-055",
+      "front": "Is initialize still required before tools/list?",
+      "back": "No.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-056",
+      "front": "Can clients skip discover and call directly?",
+      "back": "Yes, but must handle version mismatch errors.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-057",
+      "front": "Migration slogan for sessions?",
+      "back": "No sticky protocol sessions; use explicit handles.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-058",
+      "front": "Migration slogan for elicitation?",
+      "back": "Return input_required; client retries.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-059",
+      "front": "Migration slogan for Tasks?",
+      "back": "Opt into the Tasks extension and poll.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-060",
+      "front": "Migration slogan for subscriptions?",
+      "back": "Use subscriptions/listen.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-061",
+      "front": "Migration slogan for broken streams?",
+      "back": "Re-issue; do not resume by Last-Event-ID.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-062",
+      "front": "Did 2026-07-28 add required resultType?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-063",
+      "front": "Did 2026-07-28 remove protocol-level sessions?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-064",
+      "front": "Did 2026-07-28 move Tasks out of core?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-065",
+      "front": "Did 2026-07-28 introduce MRTR?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-066",
+      "front": "Did 2026-07-28 deprecate Sampling?",
+      "back": "Yes.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "changes-067",
+      "front": "What should replace Roots in new designs?",
+      "back": "Directories/files via tool params, resource URIs, or server config.",
+      "tag": "changes",
+      "rung": "100"
+    },
+    {
+      "id": "changes-068",
+      "front": "What should replace Sampling in new designs?",
+      "back": "Call LLM provider APIs directly from the server/host as appropriate.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "changes-069",
+      "front": "What should replace protocol Logging?",
+      "back": "stderr and/or OpenTelemetry.",
+      "tag": "changes",
+      "rung": "300"
+    },
+    {
+      "id": "security-001",
+      "front": "Name the three security principles.",
+      "back": "User consent and control; data privacy; tool safety.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-002",
+      "front": "Who must consent before tool invocation?",
+      "back": "The user, via the host UI.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "security-003",
+      "front": "Are tool annotations trusted by default?",
+      "back": "No.",
+      "tag": "security",
+      "rung": "300"
+    },
+    {
+      "id": "security-004",
+      "front": "What is confused-deputy risk in MCP?",
+      "back": "A server inducing the host to act with the user's authority unsafely.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-005",
+      "front": "What is tool poisoning?",
+      "back": "Malicious tool metadata steering the model into harmful actions.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "security-006",
+      "front": "What MUST clients do if iss is present?",
+      "back": "Validate it against the recorded issuer before redeeming codes.",
+      "tag": "security",
+      "rung": "300"
+    },
+    {
+      "id": "security-007",
+      "front": "How should credentials be keyed?",
+      "back": "By authorization server issuer; do not reuse across issuers.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-008",
+      "front": "How to integrity-protect requestState?",
+      "back": "HMAC or AEAD when it affects auth or business logic.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "security-009",
+      "front": "What should requestState include against replay?",
+      "back": "Principal, short TTL, originating request digest.",
+      "tag": "security",
+      "rung": "300"
+    },
+    {
+      "id": "security-010",
+      "front": "What is SEP-1024 about?",
+      "back": "Client security requirements for local server installation.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-011",
+      "front": "Should hosts auto-run newly listed tools?",
+      "back": "No. Explicit consent.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "security-012",
+      "front": "Local Draw.io MCP rule?",
+      "back": "Local @drawio/mcp stdio only; never hosted mcp.draw.io MCP.",
+      "tag": "security",
+      "rung": "300"
+    },
+    {
+      "id": "security-013",
+      "front": "Where do heavy Draw.io exports go?",
+      "back": "Keep heavy exports outside notes; store thumbnails only in the learning notebook.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-014",
+      "front": "Should API keys appear in NotebookLM sources?",
+      "back": "Never.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "security-015",
+      "front": "What is Enterprise-managed authorization extension?",
+      "back": "Central IdP policy controls for MCP OAuth in enterprises.",
+      "tag": "security",
+      "rung": "300"
+    },
+    {
+      "id": "security-016",
+      "front": "What is OAuth client credentials extension for?",
+      "back": "Machine-to-machine auth.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-017",
+      "front": "Why prefer stdio for calendar MCP?",
+      "back": "Keeps sensitive local secrets off the network path.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "security-018",
+      "front": "What is defense in depth for remote MCP?",
+      "back": "OAuth + consent UI + least-privilege scopes + logging.",
+      "tag": "security",
+      "rung": "300"
+    },
+    {
+      "id": "security-019",
+      "front": "May servers see peer server data automatically?",
+      "back": "No. Host enforces isolation.",
+      "tag": "security",
+      "rung": "100"
+    },
+    {
+      "id": "security-020",
+      "front": "What is a safe Inspector first sequence?",
+      "back": "discover then list then one read-only call.",
+      "tag": "security",
+      "rung": "200"
+    },
+    {
+      "id": "extensions-001",
+      "front": "Are extensions on by default?",
+      "back": "No. Opt-in both sides.",
+      "tag": "extensions",
+      "rung": "100"
+    },
+    {
+      "id": "extensions-002",
+      "front": "How do clients advertise extensions?",
+      "back": "clientCapabilities.extensions in _meta.",
+      "tag": "extensions",
+      "rung": "200"
+    },
+    {
+      "id": "extensions-003",
+      "front": "How do servers advertise extensions?",
+      "back": "capabilities.extensions in server/discover.",
+      "tag": "extensions",
+      "rung": "300"
+    },
+    {
+      "id": "extensions-004",
+      "front": "What if only one side supports an extension?",
+      "back": "Graceful degrade or error if mandatory.",
+      "tag": "extensions",
+      "rung": "100"
+    },
+    {
+      "id": "extensions-005",
+      "front": "tasks/get purpose?",
+      "back": "Poll task status/result.",
+      "tag": "extensions",
+      "rung": "200"
+    },
+    {
+      "id": "extensions-006",
+      "front": "tasks/update purpose?",
+      "back": "Client-to-server mid-flight input for a task.",
+      "tag": "extensions",
+      "rung": "300"
+    },
+    {
+      "id": "extensions-007",
+      "front": "MCP Apps idea?",
+      "back": "Interactive UI profiles inside host conversations.",
+      "tag": "extensions",
+      "rung": "100"
+    },
+    {
+      "id": "extensions-008",
+      "front": "Skills over MCP WG?",
+      "back": "Working group exploring rich structured instructions via MCP.",
+      "tag": "extensions",
+      "rung": "200"
+    },
+    {
+      "id": "extensions-009",
+      "front": "Registry purpose?",
+      "back": "Publish and discover MCP servers.",
+      "tag": "extensions",
+      "rung": "300"
+    },
+    {
+      "id": "extensions-010",
+      "front": "What is Glama/Smithery/mcp.so?",
+      "back": "Third-party MCP server directories/indexes.",
+      "tag": "extensions",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-001",
+      "front": "Skills vs MCP?",
+      "back": "Skills = markdown playbooks; MCP = live tool/resource endpoints.",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-002",
+      "front": "CLI wrapper vs MCP?",
+      "back": "Terminal wrappers around APIs; may exist without MCP.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-003",
+      "front": "Name a common remote MCP.",
+      "back": "Exa or Firecrawl or Perplexity (as configured).",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-004",
+      "front": "Name a common local stdio MCP.",
+      "back": "google-calendar or drawio.",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-005",
+      "front": "What is Playwright MCP used for here?",
+      "back": "Browser verification of web UI changes.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-006",
+      "front": "What is the Learn track spec pin?",
+      "back": "2026-07-28.",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-007",
+      "front": "What is Sodium Arc Spec?",
+      "back": "The study SPA visual system: ink navy, sodium amber, teal wire.",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-008",
+      "front": "Where is the study SPA?",
+      "back": "The public study console index.html in this repository.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-009",
+      "front": "Capstone artifact 1?",
+      "back": "Migration memo from 2025-11-25 habits.",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-010",
+      "front": "Capstone artifact 2?",
+      "back": "Inspector lab report (redacted).",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-011",
+      "front": "Capstone artifact 3?",
+      "back": "Mock protocol review.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-012",
+      "front": "Weekly ritual length?",
+      "back": "About 30 to 45 minutes.",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-013",
+      "front": "Primary changelog URL era?",
+      "back": "/specification/2026-07-28/changelog",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-014",
+      "front": "Why dated docs paths?",
+      "back": "Avoid /latest drift while studying a pinned revision.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-015",
+      "front": "Popular MCP: GitHub?",
+      "back": "Repos, PRs, issues, Actions for coding agents.",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-016",
+      "front": "Popular MCP: Playwright?",
+      "back": "Browser automation and testing.",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-017",
+      "front": "Popular MCP: Context7?",
+      "back": "Inject version-specific library docs into context.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-018",
+      "front": "Popular MCP: Filesystem?",
+      "back": "Scoped local file operations (official reference).",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-019",
+      "front": "Popular MCP: Browser Use?",
+      "back": "High-visibility browser automation server.",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-020",
+      "front": "Popular MCP: MarkItDown?",
+      "back": "Microsoft document-to-markdown conversion.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-021",
+      "front": "Popular MCP: Firecrawl?",
+      "back": "Web scrape/map/research (common in agent setups).",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "fleet-022",
+      "front": "Popular MCP: Chrome DevTools MCP?",
+      "back": "DevTools debugging surface for agents.",
+      "tag": "labs",
+      "rung": "100"
+    },
+    {
+      "id": "fleet-023",
+      "front": "MCP Toplist is?",
+      "back": "Live composite ranking across major registries.",
+      "tag": "labs",
+      "rung": "200"
+    },
+    {
+      "id": "fleet-024",
+      "front": "First question when reviewing a new MCP server?",
+      "back": "stdio or Streamable HTTP, and what consent UX is needed?",
+      "tag": "labs",
+      "rung": "300"
+    },
+    {
+      "id": "extra-174",
+      "front": "True or false: 2026-07-28 still requires initialize before tools/list.",
+      "back": "False. initialize was removed.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-175",
+      "front": "True or false: Mcp-Session-Id is required on Streamable HTTP.",
+      "back": "False. Protocol sessions were removed.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-176",
+      "front": "True or false: MRTR retries reuse the same JSON-RPC id.",
+      "back": "False. Use a new id.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-177",
+      "front": "True or false: Tasks remain a core protocol feature.",
+      "back": "False. They moved to an extension.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-178",
+      "front": "True or false: Sampling is recommended for new servers.",
+      "back": "False. It is deprecated.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-179",
+      "front": "True or false: subscriptions/listen replaces resources/subscribe.",
+      "back": "True.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-180",
+      "front": "True or false: Broken streams resume with Last-Event-ID.",
+      "back": "False. Re-issue the request.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-181",
+      "front": "True or false: resultType is optional.",
+      "back": "False. It is required (legacy omit means complete).",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-182",
+      "front": "True or false: ttlMs is a freshness hint.",
+      "back": "True.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-183",
+      "front": "True or false: cacheScope may be public or private.",
+      "back": "True.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-184",
+      "front": "Name one deprecated transport.",
+      "back": "HTTP+SSE.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-185",
+      "front": "Name one active remote transport.",
+      "back": "Streamable HTTP.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-186",
+      "front": "Name one local transport.",
+      "back": "stdio.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-187",
+      "front": "What does listChanged capability imply?",
+      "back": "Server can notify when a list changes (client opts in via subscriptions/listen).",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-188",
+      "front": "What is toolsListChanged?",
+      "back": "A subscription filter for tool list change notifications.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-189",
+      "front": "What is promptsListChanged?",
+      "back": "Subscription filter for prompt list changes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-190",
+      "front": "What is resourcesListChanged?",
+      "back": "Subscription filter for resource list changes.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-191",
+      "front": "What is resourceSubscriptions filter?",
+      "back": "Opt-in to resource update notifications for specific URIs.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-192",
+      "front": "Where is logLevel set now?",
+      "back": "Per-request _meta io.modelcontextprotocol/logLevel.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-193",
+      "front": "May servers emit message notifications without logLevel?",
+      "back": "No. Not for requests that omitted logLevel.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-194",
+      "front": "What is InputResponses?",
+      "back": "Client map of answers keyed like inputRequests.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-195",
+      "front": "What is complete resultType?",
+      "back": "Ordinary finished result.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-196",
+      "front": "What is discover used for on stdio?",
+      "back": "Capability/version probe and identity.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-197",
+      "front": "Why deterministic tool order?",
+      "back": "Client-side caching and LLM prompt-cache hit rates.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-198",
+      "front": "What is a dual-stack host?",
+      "back": "A host supporting both older and 2026-07-28 behaviors during migration.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-199",
+      "front": "SEP-2243 topic?",
+      "back": "HTTP header standardization for Streamable HTTP.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-200",
+      "front": "SEP-2549 topic?",
+      "back": "TTL for list results (ttlMs/cacheScope).",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-201",
+      "front": "SEP-2468 topic?",
+      "back": "Recommend/validate iss in auth responses.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-202",
+      "front": "SEP-414 topic?",
+      "back": "OpenTelemetry trace context in _meta.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-203",
+      "front": "What is a host consent UI?",
+      "back": "UI that lets users authorize data access and tool calls.",
+      "tag": "changes",
+      "rung": "200"
+    },
+    {
+      "id": "extra-204",
+      "front": "Define JSON-RPC notification.",
+      "back": "A message without an id; no response expected.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-205",
+      "front": "Define JSON-RPC request.",
+      "back": "A message with method, params, and id expecting a result/error.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-206",
+      "front": "What is a capability object?",
+      "back": "Declaration of supported features (tools, resources, prompts, extensions, ...).",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-207",
+      "front": "What is supportedVersions?",
+      "back": "Array of protocol versions a server accepts from discover.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-208",
+      "front": "What is a tool name?",
+      "back": "Unique identifier within the server namespace used in tools/call.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-209",
+      "front": "What is a tool title?",
+      "back": "Human-readable display name.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-210",
+      "front": "What is structuredContent?",
+      "back": "Optional structured JSON payload alongside content.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-211",
+      "front": "What is stdio framing?",
+      "back": "Newline-delimited JSON-RPC over process pipes.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-212",
+      "front": "What is Streamable HTTP streaming?",
+      "back": "Optional SSE-like streaming on the HTTP response.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-213",
+      "front": "What is a dedicated connection?",
+      "back": "The 1:1 client-server link maintained by the host.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-214",
+      "front": "What is composability of servers?",
+      "back": "Combining many focused servers behind one host.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-215",
+      "front": "What is the Learn hub path?",
+      "back": "Learning/MCP/00 - MCP Learning Hub.md",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-216",
+      "front": "What is flashcard tag changes for?",
+      "back": "2026-07-28 migration / changelog facts.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-217",
+      "front": "What is flashcard tag terms for?",
+      "back": "Core glossary / architecture vocabulary.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-218",
+      "front": "What is flashcard tag security for?",
+      "back": "Consent, auth, trust, threat model.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-219",
+      "front": "What is flashcard tag extensions for?",
+      "back": "Tasks, Apps, Auth extensions, registry.",
+      "tag": "terms",
+      "rung": "200"
+    },
+    {
+      "id": "extra-220",
+      "front": "What is flashcard tag labs for?",
+      "back": "Local wiring, SPA, popular servers, capstone.",
+      "tag": "terms",
+      "rung": "200"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+*_credentials.json
+service_account*.json
+auth.json
+tokens.json
+node_modules/
+.DS_Store
+Thumbs.db
+.playwright-mcp/
