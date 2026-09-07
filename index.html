@@ -338,6 +338,63 @@ details.sc-box p { margin: .35rem 0 0; color: var(--paper); font-size: 12.5px; }
 details.sc-box ul { margin: .35rem 0 0; padding-left: 1.1rem; }
 details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
 
+.lesson-list { display: grid; gap: 8px; }
+.lesson-item {
+  border: 1px solid var(--line); border-radius: var(--radius); background: rgba(0,0,0,.22); padding: 0;
+}
+.lesson-item summary {
+  cursor: pointer; padding: 12px 14px; font-family: var(--display); font-size: 15px; list-style: none;
+}
+.lesson-item summary::-webkit-details-marker { display: none; }
+.lesson-item summary::before { content: "▸ "; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.lesson-item[open] summary::before { content: "▾ "; color: var(--amber); }
+.lesson-item[open] summary { border-bottom: 1px solid var(--line); }
+.lesson-item p { margin: 0; padding: 12px 14px 14px; color: var(--muted); font-size: 13px; }
+
+.diagram-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+.diagram-fig {
+  margin: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #05080f;
+}
+.diagram-fig img { display: block; width: 100%; height: auto; }
+.diagram-fig figcaption {
+  padding: 8px 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted);
+}
+
+.digest-list { margin: 0; padding-left: 1.2rem; }
+.digest-list li { margin: 8px 0; }
+
+.ladder-detail { display: grid; gap: 12px; margin-top: 8px; }
+.ladder-card {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; background: rgba(0,0,0,.22);
+}
+.ladder-card h4 { margin: 0 0 8px; font-family: var(--display); font-size: 16px; color: var(--amber); }
+.ladder-card .rung { margin: 8px 0 0; font-size: 12.5px; }
+.ladder-card .rung b { color: var(--teal); }
+
+.cheat-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+.cheat-block {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; background: rgba(0,0,0,.22);
+}
+.cheat-block h3 { margin-top: 0; }
+.cheat-block.full { grid-column: 1 / -1; }
+
+.reading-card, .sep-card {
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; background: rgba(0,0,0,.22); margin-bottom: 10px;
+}
+.reading-card a, .sep-card a { font-family: var(--display); font-size: 15px; }
+.reading-meta { font-size: 11px; color: var(--muted); margin-top: 4px; letter-spacing: .04em; }
+.cap-card {
+  border: 1px solid var(--line); border-left: 3px solid var(--amber); border-radius: var(--radius);
+  padding: 14px; background: rgba(0,0,0,.22); margin-bottom: 12px;
+}
+.cap-card h3 { margin: 0 0 6px; color: var(--amber); }
+
 @media (max-width: 1100px) {
   .grid.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .showcase-grid { grid-template-columns: 1fr; }
@@ -351,7 +408,7 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
   .top { grid-template-columns: 1fr; }
   .pin { text-align: left; width: fit-content; }
   .panel { padding: 18px; }
-  .grid.cards, #gList, #promptList, .choices, .showcase-grid { grid-template-columns: 1fr; }
+  .grid.cards, #gList, #promptList, .choices, .showcase-grid, .diagram-grid, .cheat-grid { grid-template-columns: 1fr; }
   .lane { grid-template-columns: 1fr; }
   .change-map { grid-template-columns: 1fr; }
   .change-map .arrow { transform: rotate(90deg); padding: 4px 0; }
@@ -392,10 +449,13 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
       <button data-tab="curriculum">Curriculum</button>
       <button data-tab="progress">Ladders</button>
       <button data-tab="changes">Change map</button>
+      <button data-tab="cheat">Cheat sheet</button>
+      <button data-tab="readings">Readings</button>
       <button data-tab="cards">Flashcards</button>
       <button data-tab="quiz">Quiz</button>
       <button data-tab="glossary">Glossary</button>
       <button data-tab="showcase">Showcase</button>
+      <button data-tab="capstone">Capstone</button>
       <button data-tab="shorts">Shorts</button>
       <button data-tab="prompts">Prompts</button>
     </nav>
@@ -429,12 +489,15 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
   </section>
 
   <section class="panel" id="curriculum">
-    <h2>Four-week curriculum</h2>
+    <div class="panel-head">
+      <h2>Four-week curriculum</h2>
+      <p class="muted">Lesson spine + diagrams from the vault study pack.</p>
+    </div>
     <table>
       <thead><tr><th>Week</th><th>Focus</th><th>Labs</th></tr></thead>
       <tbody>
-        <tr><td>1</td><td>Foundations · host/client/server · primitives · transports</td><td>Architecture diagram · NLM master</td></tr>
-        <tr><td>2</td><td>2026-07-28 breaks · discover · MRTR · subscriptions · deprecations</td><td>Old→new habit table · what's-new slide</td></tr>
+        <tr><td>1</td><td>Foundations · host/client/server · primitives · transports</td><td>Architecture diagram · readings-core</td></tr>
+        <tr><td>2</td><td>2026-07-28 breaks · discover · MRTR · subscriptions · deprecations</td><td>Old→new habit table · what's-new diagram</td></tr>
         <tr><td>3</td><td>Security · OAuth/iss · requestState · Tasks/Apps extensions</td><td>Threat cards (stdio + remote)</td></tr>
         <tr><td>4</td><td>Inspector · Skills vs MCP vs CLI · capstone</td><td>Migration memo · mock review</td></tr>
       </tbody>
@@ -446,17 +509,77 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
       <div class="card"><div class="label">C · 20%</div><b>Security &amp; auth</b><p>Consent · iss · state integrity</p></div>
       <div class="card"><div class="label">D · 15%</div><b>Build &amp; labs</b><p>Inspector · config practice</p></div>
     </div>
+    <h3>Lesson spine</h3>
+    <div id="lessonList" class="lesson-list"></div>
+    <h3>Diagrams</h3>
+    <div class="diagram-grid" id="diagramGrid"></div>
   </section>
 
   <section class="panel" id="progress">
-    <h2>100 / 200 / 300 ladders</h2>
-    <p class="muted">Self-rate honestly. Stored locally in this browser only.</p>
+    <div class="panel-head">
+      <h2>100 / 200 / 300 ladders</h2>
+      <p class="muted">Self-rate honestly. Stored locally in this browser only.</p>
+    </div>
     <div class="progress-lanes" id="lanes"></div>
+    <h3>Rung definitions</h3>
+    <div id="ladderDetail" class="ladder-detail"></div>
   </section>
 
   <section class="panel" id="changes">
-    <h2>Change map · 2025-11-25 → 2026-07-28</h2>
+    <div class="panel-head">
+      <h2>Change map · 2025-11-25 → 2026-07-28</h2>
+      <p class="muted">Was → now pairs plus the vault changelog digest.</p>
+    </div>
     <div class="change-map" id="changeMap"></div>
+    <h3>Must-know breaks</h3>
+    <ol id="changelogMajor" class="digest-list"></ol>
+    <h3>Deprecated → migrate toward</h3>
+    <table>
+      <thead><tr><th>Feature</th><th>Migrate toward</th></tr></thead>
+      <tbody id="changelogDeprecated"></tbody>
+    </table>
+    <h3>What's-new diagram</h3>
+    <figure class="diagram-fig">
+      <img src="assets/diagrams/mcp-whats-new-2026-07-28.png" alt="MCP what is new 2026-07-28" loading="lazy" />
+    </figure>
+  </section>
+
+  <section class="panel" id="cheat">
+    <div class="panel-head">
+      <h2>Protocol cheat sheet</h2>
+      <p class="muted">One-page lookup for roles, `_meta`, RPCs, transports, and security.</p>
+    </div>
+    <div id="cheatSheet"></div>
+  </section>
+
+  <section class="panel" id="readings">
+    <div class="panel-head">
+      <h2>Primary readings</h2>
+      <p class="muted">Dated public docs only. Filter by week. Prefer these over lagging blog posts.</p>
+    </div>
+    <div class="row">
+      <label class="muted">Week
+        <select id="readingWeek">
+          <option value="all">All</option>
+          <option value="1">1 · Core</option>
+          <option value="2">2 · Changes</option>
+          <option value="3">3 · Security</option>
+          <option value="4">4 · Build</option>
+        </select>
+      </label>
+      <span class="muted" id="readingMeta"></span>
+    </div>
+    <div id="readingList"></div>
+    <h3>Must-know SEPs</h3>
+    <div id="sepList"></div>
+  </section>
+
+  <section class="panel" id="capstone">
+    <div class="panel-head">
+      <h2>Capstone rubric</h2>
+      <p class="muted">Three artifacts. Score each dimension 0–3. Public sources only — no secrets in submissions.</p>
+    </div>
+    <div id="capstoneBody"></div>
   </section>
 
   <section class="panel" id="cards">
@@ -1060,6 +1183,131 @@ loadShorts();
     console.warn("cards-data.json not ready yet", e);
   }
 })();
+
+/* === STUDY DATA FROM VAULT PACK === */
+let STUDY = null;
+let ALL_READINGS = [];
+
+function renderCheat(cs) {
+  if (!cs) return;
+  document.getElementById("cheatSheet").innerHTML = `
+    <div class="cheat-grid">
+      <div class="cheat-block full"><h3>Roles</h3><p>${esc(cs.roles)}</p></div>
+      <div class="cheat-block"><h3>Every request _meta</h3>
+        <table><thead><tr><th>Key</th><th>Who</th><th>Purpose</th></tr></thead>
+        <tbody>${cs.metaKeys.map(([k,w,p]) => `<tr><td><code>${esc(k)}</code></td><td>${esc(w)}</td><td>${esc(p)}</td></tr>`).join("")}</tbody></table>
+      </div>
+      <div class="cheat-block"><h3>Core RPCs</h3>
+        <table><thead><tr><th>Side</th><th>Method</th><th>Notes</th></tr></thead>
+        <tbody>${cs.rpcs.map(([s,m,n]) => `<tr><td>${esc(s)}</td><td><code>${esc(m)}</code></td><td>${esc(n)}</td></tr>`).join("")}</tbody></table>
+      </div>
+      <div class="cheat-block"><h3>resultType</h3>
+        <table><tbody>${cs.resultTypes.map(([k,v]) => `<tr><td><code>${esc(k)}</code></td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>
+      </div>
+      <div class="cheat-block"><h3>Transports</h3>
+        <table><tbody>${cs.transports.map(([k,v]) => `<tr><td><b>${esc(k)}</b></td><td>${esc(v)}</td></tr>`).join("")}</tbody></table>
+      </div>
+      <div class="cheat-block"><h3>Security</h3><ol>${cs.security.map(s => `<li>${esc(s)}</li>`).join("")}</ol></div>
+      <div class="cheat-block"><h3>Extensions (opt-in)</h3><ul>${cs.extensions.map(s => `<li><code>${esc(s)}</code></li>`).join("")}</ul></div>
+    </div>`;
+}
+
+function renderLaddersDetail(ladders) {
+  if (!ladders) return;
+  document.getElementById("ladderDetail").innerHTML = Object.values(ladders).map(l => `
+    <article class="ladder-card">
+      <h4>${esc(l.name)} · ${esc(l.weight)}</h4>
+      <div class="rung"><b>100</b> — ${esc(l["100"])}</div>
+      <div class="rung"><b>200</b> — ${esc(l["200"])}</div>
+      <div class="rung"><b>300</b> — ${esc(l["300"])}</div>
+    </article>`).join("");
+}
+
+function renderChangelog(ch) {
+  if (!ch) return;
+  document.getElementById("changelogMajor").innerHTML = ch.major.map(x => `<li>${esc(x)}</li>`).join("");
+  document.getElementById("changelogDeprecated").innerHTML = ch.deprecated.map(([a,b]) =>
+    `<tr><td>${esc(a)}</td><td>${esc(b)}</td></tr>`).join("");
+}
+
+function renderLessons(lessons) {
+  if (!lessons) return;
+  document.getElementById("lessonList").innerHTML = lessons.map(l => `
+    <details class="lesson-item"><summary>${esc(l.title)}</summary><p>${esc(l.summary)}</p></details>`).join("");
+}
+
+function renderDiagrams(diagrams) {
+  if (!diagrams) return;
+  document.getElementById("diagramGrid").innerHTML = diagrams.map(d => `
+    <figure class="diagram-fig"><img src="${esc(d.src)}" alt="${esc(d.alt)}" loading="lazy" />
+    <figcaption>${esc(d.title)}</figcaption></figure>`).join("");
+}
+
+function renderReadings() {
+  const week = document.getElementById("readingWeek").value;
+  const list = week === "all" ? ALL_READINGS : ALL_READINGS.filter(r => String(r.week) === week);
+  document.getElementById("readingMeta").textContent = `${list.length} sources`;
+  document.getElementById("readingList").innerHTML = list.map(r => `
+    <article class="reading-card">
+      <a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>
+      <div class="reading-meta">Week ${esc(r.week)} · rung ${esc(r.rung)}</div>
+      <p class="muted" style="margin:6px 0 0">${esc(r.why)}</p>
+    </article>`).join("");
+}
+
+function renderSeps(seps) {
+  if (!seps) return;
+  document.getElementById("sepList").innerHTML = seps.map(s => `
+    <article class="sep-card">
+      <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.sep)} — ${esc(s.title)}</a>
+      <p class="muted" style="margin:6px 0 0">${esc(s.why)}</p>
+    </article>`).join("");
+}
+
+function renderCapstone(cap) {
+  if (!cap) return;
+  const dims = `<p class="muted">Dimensions (0–3 each): ${cap.dimensions.map(esc).join(" · ")}</p>
+    <table><thead><tr><th>Score</th><th>Meaning</th></tr></thead>
+    <tbody>${cap.scoring.map(([s,m]) => `<tr><td>${esc(s)}</td><td>${esc(m)}</td></tr>`).join("")}</tbody></table>`;
+  const arts = cap.artifacts.map(a => `
+    <article class="cap-card">
+      <h3>${esc(a.id)} — ${esc(a.title)}</h3>
+      <p>${esc(a.intent)}</p>
+      <details class="sc-box what"><summary>Required contents</summary>
+        <ul>${a.required.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      </details>
+      <details class="sc-box why"><summary>Pass criteria</summary><p>${esc(a.pass)}</p></details>
+    </article>`).join("");
+  document.getElementById("capstoneBody").innerHTML = dims + arts;
+}
+
+(async function loadStudy() {
+  try {
+    const res = await fetch("study-data.json?ts=" + Date.now());
+    STUDY = await res.json();
+    if (STUDY.glossary?.length) {
+      GLOSSARY.length = 0;
+      STUDY.glossary.forEach(([t,d]) => GLOSSARY.push([t,d]));
+      renderGlossary();
+    }
+    renderCheat(STUDY.cheatSheet);
+    renderLaddersDetail(STUDY.ladders);
+    renderChangelog(STUDY.changelog);
+    renderLessons(STUDY.lessons);
+    renderDiagrams(STUDY.diagrams);
+    ALL_READINGS = []
+      .concat(STUDY.readings?.core || [])
+      .concat(STUDY.readings?.changes || [])
+      .concat(STUDY.readings?.security || [])
+      .concat(STUDY.readings?.build || []);
+    renderReadings();
+    renderSeps(STUDY.seps);
+    renderCapstone(STUDY.capstone);
+  } catch (e) {
+    console.warn("study-data.json not ready", e);
+  }
+})();
+document.getElementById("readingWeek").addEventListener("change", renderReadings);
 </script>
 </body>
 </html>

@@ -1,0 +1,1046 @@
+{
+  "glossary": [
+    [
+      "MCP",
+      "Model Context Protocol - JSON-RPC protocol connecting AI hosts to context and tools"
+    ],
+    [
+      "Host",
+      "AI application that creates clients and enforces consent (Claude Code, Cursor, VS Code, and similar hosts)"
+    ],
+    [
+      "Client",
+      "One connector inside the host; **1:1** with a single server"
+    ],
+    [
+      "Server",
+      "Process or remote service exposing tools / resources / prompts"
+    ],
+    [
+      "Tool",
+      "Callable function the model may invoke (`tools/list`, `tools/call`)"
+    ],
+    [
+      "Resource",
+      "Contextual data (`resources/list`, `resources/read`)"
+    ],
+    [
+      "Prompt",
+      "Templated message or workflow (`prompts/list`, `prompts/get`)"
+    ],
+    [
+      "Primitive",
+      "Collective name for tools, resources, and prompts"
+    ],
+    [
+      "JSON-RPC 2.0",
+      "Wire encoding for MCP requests, results, and errors"
+    ],
+    [
+      "SEP",
+      "Specification Enhancement Proposal (PR-numbered change proposal)"
+    ],
+    [
+      "stdio",
+      "Local transport over stdin/stdout; one client per process"
+    ],
+    [
+      "Streamable HTTP",
+      "Remote transport: HTTP POST plus optional streaming response; no protocol session id"
+    ],
+    [
+      "HTTP+SSE transport",
+      "Older remote transport (GET SSE + POST); **Deprecated**; migrate to Streamable HTTP"
+    ],
+    [
+      "Stateless MCP",
+      "No protocol-level sessions; no `initialize` handshake; each request is self-contained"
+    ],
+    [
+      "`Mcp-Session-Id`",
+      "Former session header; **removed** in 2026-07-28 ([SEP-2567](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2567))"
+    ],
+    [
+      "`initialize` / `notifications/initialized`",
+      "Former handshake; **removed** ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))"
+    ],
+    [
+      "Server-minted handle",
+      "Explicit opaque state token passed as ordinary tool arguments when cross-call state is needed"
+    ],
+    [
+      "`Mcp-Method`",
+      "Required Streamable HTTP header naming the JSON-RPC method (e.g. `tools/call`)"
+    ],
+    [
+      "`Mcp-Name`",
+      "Required Streamable HTTP header naming the tool/resource/prompt target when applicable"
+    ],
+    [
+      "`x-mcp-header`",
+      "Mechanism to promote selected tool parameters into HTTP headers for gateway routing"
+    ],
+    [
+      "Last-Event-ID / SSE resumability",
+      "Former stream resume mechanism; **removed**. Broken stream ⇒ re-issue with a **new** request id"
+    ],
+    [
+      "`server/discover`",
+      "**MUST**-implement RPC advertising supported protocol versions, capabilities, and identity"
+    ],
+    [
+      "`_meta`",
+      "Per-request / per-result metadata bag (version, capabilities, clientInfo, serverInfo, …)"
+    ],
+    [
+      "`io.modelcontextprotocol/protocolVersion`",
+      "`_meta` key carrying the protocol version on every request"
+    ],
+    [
+      "`io.modelcontextprotocol/clientCapabilities`",
+      "`_meta` key declaring what the client supports (elicitation, extensions, …)"
+    ],
+    [
+      "`io.modelcontextprotocol/clientInfo`",
+      "`_meta` key; clients SHOULD identify name + version on each request"
+    ],
+    [
+      "`io.modelcontextprotocol/serverInfo`",
+      "`_meta` key; servers SHOULD identify themselves on each result"
+    ],
+    [
+      "`io.modelcontextprotocol/logLevel`",
+      "Per-request log level in `_meta`; replaces `logging/setLevel`"
+    ],
+    [
+      "`UnsupportedProtocolVersionError`",
+      "Error when client and server protocol versions do not match (`-32022`)"
+    ],
+    [
+      "`resultType`",
+      "Required on every result: `\"complete\"` or `\"input_required\"`"
+    ],
+    [
+      "`complete`",
+      "`resultType` value meaning the operation finished"
+    ],
+    [
+      "`CacheableResult`",
+      "Interface adding `ttlMs` and `cacheScope` on list/read results"
+    ],
+    [
+      "`ttlMs`",
+      "Freshness hint in milliseconds for client-side caching of list/read results"
+    ],
+    [
+      "`cacheScope`",
+      "`\"public\"` or `\"private\"`; whether shared intermediaries may cache the response"
+    ],
+    [
+      "Deterministic `tools/list` order",
+      "Servers SHOULD return tools in stable order for client and LLM prompt-cache hits"
+    ],
+    [
+      "`extensions` (capabilities)",
+      "Field on ClientCapabilities / ServerCapabilities listing opt-in extensions"
+    ],
+    [
+      "MRTR",
+      "Multi Round-Trip Requests - pattern replacing server-initiated requests over a held-open stream ([SEP-2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322))"
+    ],
+    [
+      "`InputRequiredResult`",
+      "Result with `resultType: \"input_required\"` asking the client for more information before completion"
+    ],
+    [
+      "`inputRequests`",
+      "Map of server-assigned ids → request objects (`elicitation/create`, `sampling/createMessage`, `roots/list`)"
+    ],
+    [
+      "`inputResponses`",
+      "Map the client sends on retry; keys match `inputRequests`"
+    ],
+    [
+      "`requestState`",
+      "Opaque server-owned blob echoed unchanged on retry; treat as attacker-controlled on the server"
+    ],
+    [
+      "Elicitation",
+      "Server asks the user for structured input (via MRTR `elicitation/create`)"
+    ],
+    [
+      "Sampling",
+      "Server asks the host LLM to complete a message - feature **Deprecated**; still usable via MRTR during the window"
+    ],
+    [
+      "Roots",
+      "Workspace root listing - feature **Deprecated**; still usable via MRTR during the window"
+    ],
+    [
+      "URL-mode elicitation",
+      "Out-of-band browser/user flow; completion is learned by retrying the original request (no `notifications/elicitation/complete`)"
+    ],
+    [
+      "`subscriptions/listen`",
+      "Long-lived POST response stream for opt-in server-to-client change notifications"
+    ],
+    [
+      "`toolsListChanged`",
+      "Subscription type for tool catalog changes"
+    ],
+    [
+      "`promptsListChanged`",
+      "Subscription type for prompt catalog changes"
+    ],
+    [
+      "`resourcesListChanged`",
+      "Subscription type for resource catalog changes"
+    ],
+    [
+      "`resourceSubscriptions`",
+      "Subscription type for specific resource update notifications"
+    ],
+    [
+      "`io.modelcontextprotocol/subscriptionId`",
+      "Tag on notifications acknowledging which listen subscription they belong to"
+    ],
+    [
+      "Request-scoped notifications",
+      "e.g. `notifications/progress`, `notifications/message` on the **request** response stream, not `subscriptions/listen`"
+    ],
+    [
+      "`resources/subscribe` / `unsubscribe`",
+      "Former resource subscription RPCs; **replaced** by `subscriptions/listen`"
+    ],
+    [
+      "`ping`",
+      "Former keepalive RPC; **removed**"
+    ],
+    [
+      "`logging/setLevel`",
+      "Former session log-level RPC; **removed** (use per-request `logLevel` in `_meta`)"
+    ],
+    [
+      "`notifications/cancelled`",
+      "Cancellation signal; on Streamable HTTP, closing the response stream is cancellation; this notification is stdio-oriented"
+    ],
+    [
+      "Extension",
+      "Opt-in capability beyond core, namespaced `io.modelcontextprotocol/…`"
+    ],
+    [
+      "Tasks extension",
+      "Official extension `io.modelcontextprotocol/tasks` for durable async work ([SEP-2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663))"
+    ],
+    [
+      "`tasks/get`",
+      "Poll task status / result (replaces blocking `tasks/result`)"
+    ],
+    [
+      "`tasks/update`",
+      "Client-to-server mid-flight input for a task"
+    ],
+    [
+      "`tasks/cancel`",
+      "Cancel an in-flight task"
+    ],
+    [
+      "`tasks/list`",
+      "Former task listing RPC; **removed** from the redesigned extension"
+    ],
+    [
+      "`tasks/result`",
+      "Former blocking wait; **replaced** by polling `tasks/get`"
+    ],
+    [
+      "Task handle",
+      "Server-returned reference a client uses with `tasks/get` / `update` / `cancel`; may be returned unsolicited"
+    ],
+    [
+      "MCP Apps",
+      "Extension letting servers deliver interactive HTML UIs hosts render in a sandboxed iframe"
+    ],
+    [
+      "EMA",
+      "Enterprise Managed Authorization - extension path for org-managed auth"
+    ],
+    [
+      "Feature lifecycle",
+      "Active → Deprecated (≥12 months) → Removed ([policy](https://modelcontextprotocol.io/community/feature-lifecycle))"
+    ],
+    [
+      "Deprecated features registry",
+      "Canonical list of Deprecated-state features: [deprecated](https://modelcontextprotocol.io/specification/2026-07-28/deprecated)"
+    ],
+    [
+      "Logging (feature)",
+      "Protocol log messages to client - **Deprecated**; prefer stderr (stdio) or OpenTelemetry"
+    ],
+    [
+      "Client ID Metadata Documents",
+      "Preferred client registration: client publishes metadata at a URL used as its `client_id`"
+    ],
+    [
+      "DCR (RFC7591)",
+      "OAuth Dynamic Client Registration - **Deprecated** in favor of Client ID Metadata Documents"
+    ],
+    [
+      "`iss` validation",
+      "Clients MUST validate a present `iss` in auth responses against the recorded issuer ([RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207))"
+    ],
+    [
+      "Issuer-bound credentials",
+      "Client credentials MUST be keyed by issuer; MUST NOT reuse across authorization servers"
+    ],
+    [
+      "`application_type`",
+      "DCR field clients must set appropriately to avoid OIDC redirect URI conflicts"
+    ],
+    [
+      "Tool annotations",
+      "Hints about tool behavior; treat as untrusted unless the server is trusted"
+    ],
+    [
+      "Consent",
+      "Host-enforced user approval for data access and tool invocation"
+    ],
+    [
+      "OpenTelemetry `_meta` keys",
+      "`traceparent`, `tracestate`, `baggage` for distributed tracing conventions"
+    ],
+    [
+      "`-32602` Invalid Params",
+      "Resource-not-found now uses this code (was `-32002`)"
+    ],
+    [
+      "`-32020` HeaderMismatch",
+      "Spec-reserved error when HTTP MCP headers disagree with the body"
+    ],
+    [
+      "`-32021` MissingRequiredClientCapability",
+      "Client lacked a capability the server needed"
+    ],
+    [
+      "`-32022` UnsupportedProtocolVersion",
+      "Protocol version mismatch"
+    ],
+    [
+      "Error code policy",
+      "`-32000`–`-32019` implementation-defined; `-32020`–`-32099` reserved for the MCP spec"
+    ],
+    [
+      "JSON Schema 2020-12",
+      "Allowed keyword set for tool `inputSchema` / `outputSchema` (loosened in this revision)"
+    ],
+    [
+      "`$ref` resolution",
+      "Schema references must resolve under documented rules and resource bounds"
+    ]
+  ],
+  "readings": {
+    "core": [
+      {
+        "title": "Specification (overview)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+        "rung": "100",
+        "why": "Authoritative entry: JSON-RPC, host/client/server, feature summary for tools, resources, prompts, elicitation.",
+        "week": 1
+      },
+      {
+        "title": "Architecture overview (learn)",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/architecture",
+        "rung": "100",
+        "why": "Friendly participant and layer map (data layer vs transport layer) with host examples.",
+        "week": 1
+      },
+      {
+        "title": "Architecture (spec)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/architecture",
+        "rung": "200",
+        "why": "Normative host/client/server responsibilities; states MCP is stateless and every request carries version and capabilities.",
+        "week": 1
+      },
+      {
+        "title": "Understanding MCP servers",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/server-concepts",
+        "rung": "100",
+        "why": "Tools vs resources vs prompts with control and examples; multi-server composition intuition.",
+        "week": 1
+      },
+      {
+        "title": "Understanding MCP clients",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/learn/client-concepts",
+        "rung": "100",
+        "why": "Client-side features, especially elicitation; pairs with server concepts.",
+        "week": 1
+      },
+      {
+        "title": "Getting started intro",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/getting-started/intro",
+        "rung": "100",
+        "why": "Short \"what is MCP\" orientation before diving the spec.",
+        "week": 1
+      },
+      {
+        "title": "Server features overview",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/server",
+        "rung": "200",
+        "why": "Spec index for server primitives and utilities.",
+        "week": 1
+      },
+      {
+        "title": "Tools",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/tools",
+        "rung": "200",
+        "why": "Model-invoked functions: list/call contracts, schemas, annotations posture.",
+        "week": 1
+      },
+      {
+        "title": "Resources",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/resources",
+        "rung": "200",
+        "why": "Passive context and templates; read paths and annotations.",
+        "week": 1
+      },
+      {
+        "title": "Prompts",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/prompts",
+        "rung": "200",
+        "why": "Templated workflows surfaced to users or hosts.",
+        "week": 1
+      },
+      {
+        "title": "Discovery (`server/discover`)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/discover",
+        "rung": "200",
+        "why": "Required RPC to advertise versions, capabilities, identity before or instead of legacy handshake.",
+        "week": 1
+      },
+      {
+        "title": "Message patterns overview",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns",
+        "rung": "200",
+        "why": "Client initiates; server answers; servers MUST NOT initiate JSON-RPC requests (sets up MRTR later).",
+        "week": 1
+      },
+      {
+        "title": "Transports overview",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports",
+        "rung": "200",
+        "why": "Binding vs semantics: stdio and Streamable HTTP; custom transports allowed.",
+        "week": 1
+      },
+      {
+        "title": "stdio transport",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio",
+        "rung": "200",
+        "why": "Local subprocess: newline-delimited JSON-RPC on stdin/stdout; fleet default for Desktop tools.",
+        "week": 1
+      }
+    ],
+    "changes": [
+      {
+        "title": "Key changes (changelog)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/changelog",
+        "rung": "200",
+        "why": "Official delta vs 2025-11-25: sessions gone, stateless `_meta`, discover, subscriptions/listen, MRTR, Tasks extension, SSE resume removed.",
+        "week": 2
+      },
+      {
+        "title": "Deprecated features registry",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/deprecated",
+        "rung": "200",
+        "why": "Living registry under the lifecycle policy: Roots, Sampling, Logging, DCR, HTTP+SSE, includeContext values; earliest removal dates.",
+        "week": 2
+      },
+      {
+        "title": "Discovery (`server/discover`)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/server/discover",
+        "rung": "200",
+        "why": "Required capability/version/identity advertisement; replaces handshake discovery.",
+        "week": 2
+      },
+      {
+        "title": "Multi Round-Trip Requests (MRTR)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr",
+        "rung": "200",
+        "why": "`InputRequiredResult`, `inputRequests`, opaque `requestState`, client retry; replaces server-initiated JSON-RPC requests.",
+        "week": 2
+      },
+      {
+        "title": "Subscriptions",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/subscriptions",
+        "rung": "200",
+        "why": "`subscriptions/listen` replaces HTTP GET + resources/subscribe/unsubscribe for change notifications.",
+        "week": 2
+      },
+      {
+        "title": "Versioning and compatibility",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning",
+        "rung": "200",
+        "why": "Per-request protocol version; modern vs legacy interop probes on stdio and Streamable HTTP.",
+        "week": 2
+      },
+      {
+        "title": "Message patterns overview",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns",
+        "rung": "200",
+        "why": "Hard rule: servers MUST NOT initiate requests; all server-to-client asks go through MRTR.",
+        "week": 2
+      },
+      {
+        "title": "Cancellation",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/cancellation",
+        "rung": "200",
+        "why": "Client cancel semantics; server cancel limited to tearing down `subscriptions/listen`.",
+        "week": 2
+      },
+      {
+        "title": "Progress",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/progress",
+        "rung": "200",
+        "why": "Request-scoped progress notifications via `progressToken` (still on the response stream).",
+        "week": 2
+      },
+      {
+        "title": "Elicitation (client)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation",
+        "rung": "200",
+        "why": "How elicitation is expressed under MRTR rather than as a free-standing server request.",
+        "week": 2
+      },
+      {
+        "title": "Tasks extension overview",
+        "url": "https://modelcontextprotocol.io/extensions/tasks/overview",
+        "rung": "200",
+        "why": "Long-running work left core; poll with tasks APIs; mid-flight input via tasks/update.",
+        "week": 2
+      },
+      {
+        "title": "Extensions overview",
+        "url": "https://modelcontextprotocol.io/extensions/overview",
+        "rung": "100",
+        "why": "Formal extensions framework context for Tasks, Apps, Auth extensions.",
+        "week": 2
+      }
+    ],
+    "security": [
+      {
+        "title": "Security best practices",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices",
+        "rung": "100",
+        "why": "Attack vectors and implementer practices: consent, tool safety, treat annotations as untrusted.",
+        "week": 3
+      },
+      {
+        "title": "Understanding authorization in MCP",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization",
+        "rung": "100",
+        "why": "OAuth 2.1-oriented tutorial for protecting remote MCP resources and operations.",
+        "week": 3
+      },
+      {
+        "title": "Authorization (spec overview)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
+        "rung": "200",
+        "why": "Normative authorization requirements for Streamable HTTP and protected resources.",
+        "week": 3
+      },
+      {
+        "title": "Authorization server discovery",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/authorization-server-discovery",
+        "rung": "200",
+        "why": "How clients find the AS; Protected Resource Metadata alignment.",
+        "week": 3
+      },
+      {
+        "title": "Client registration",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/client-registration",
+        "rung": "200",
+        "why": "Three registration paths; **Client ID Metadata Documents** preferred over Dynamic Client Registration.",
+        "week": 3
+      },
+      {
+        "title": "Authorization security considerations",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/security-considerations",
+        "rung": "300",
+        "why": "Spec-level security considerations for auth implementations.",
+        "week": 3
+      },
+      {
+        "title": "Multi Round-Trip Requests (requestState)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/patterns/mrtr",
+        "rung": "200",
+        "why": "Opaque `requestState`: clients echo verbatim; servers MUST treat it as attacker-controlled and integrity-protect if it affects auth or access.",
+        "week": 3
+      },
+      {
+        "title": "Elicitation",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation",
+        "rung": "200",
+        "why": "User-facing input and URL-mode flows; consent UX sits here under MRTR.",
+        "week": 3
+      },
+      {
+        "title": "Authorization extensions overview",
+        "url": "https://modelcontextprotocol.io/extensions/auth/overview",
+        "rung": "100",
+        "why": "Supplementary auth mechanisms beyond the core.",
+        "week": 3
+      },
+      {
+        "title": "OAuth client credentials extension",
+        "url": "https://modelcontextprotocol.io/extensions/auth/oauth-client-credentials",
+        "rung": "200",
+        "why": "Machine-to-machine client credentials flow for MCP.",
+        "week": 3
+      },
+      {
+        "title": "Enterprise-managed authorization",
+        "url": "https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization",
+        "rung": "300",
+        "why": "Centralized IdP policy for enterprise MCP deployments.",
+        "week": 3
+      },
+      {
+        "title": "Deprecated features (DCR row)",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/deprecated",
+        "rung": "200",
+        "why": "Dynamic Client Registration deprecated in favor of Client ID Metadata Documents.",
+        "week": 3
+      }
+    ],
+    "build": [
+      {
+        "title": "Build an MCP server",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-server",
+        "rung": "200",
+        "why": "First server tutorial for Desktop and other clients.",
+        "week": 4
+      },
+      {
+        "title": "Build an MCP client",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-client",
+        "rung": "200",
+        "why": "First client that can talk to any MCP server.",
+        "week": 4
+      },
+      {
+        "title": "Client best practices",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/clients/client-best-practices",
+        "rung": "300",
+        "why": "Patterns for scaling hosts across many servers and tools (progressive discovery).",
+        "week": 4
+      },
+      {
+        "title": "Connect to local MCP servers",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-local-servers",
+        "rung": "100",
+        "why": "Stdio wiring for Claude Desktop-style local servers.",
+        "week": 4
+      },
+      {
+        "title": "Connect to remote MCP servers",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/connect-remote-servers",
+        "rung": "100",
+        "why": "Remote Streamable HTTP + auth-oriented connection guide.",
+        "week": 4
+      },
+      {
+        "title": "Build with Agent Skills",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/develop/build-with-agent-skills",
+        "rung": "200",
+        "why": "Using agent skills to guide MCP server design (complements fleet skill files; keep Skills vs MCP split clear).",
+        "week": 4
+      },
+      {
+        "title": "SDKs",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/sdk",
+        "rung": "100",
+        "why": "Official SDK index and tier notes.",
+        "week": 4
+      },
+      {
+        "title": "SDK tiering system",
+        "url": "https://modelcontextprotocol.io/community/sdk-tiers",
+        "rung": "200",
+        "why": "What Tier 1 vs Tier 2/3 means for protocol completeness.",
+        "week": 4
+      },
+      {
+        "title": "Example servers",
+        "url": "https://modelcontextprotocol.io/examples",
+        "rung": "100",
+        "why": "Curated example servers and implementations.",
+        "week": 4
+      },
+      {
+        "title": "MCP Inspector (overview)",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector",
+        "rung": "200",
+        "why": "Web / CLI / TUI Inspector entry for testing servers.",
+        "week": 4
+      },
+      {
+        "title": "Inspector web client",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/web",
+        "rung": "200",
+        "why": "Tab-by-tab graphical walkthrough.",
+        "week": 4
+      },
+      {
+        "title": "Inspector CLI client",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/cli",
+        "rung": "200",
+        "why": "Scriptable methods, output formats, CI recipes.",
+        "week": 4
+      },
+      {
+        "title": "Inspector TUI client",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/tui",
+        "rung": "100",
+        "why": "Terminal UI navigation reference.",
+        "week": 4
+      },
+      {
+        "title": "Inspector configuration and flags",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/configuration",
+        "rung": "200",
+        "why": "Catalog vs config files, flags, environment variables.",
+        "week": 4
+      }
+    ]
+  },
+  "seps": [
+    {
+      "sep": "SEP-2575",
+      "title": "Make MCP Stateless",
+      "url": "https://modelcontextprotocol.io/seps/2575-stateless-mcp",
+      "why": "Removes initialize/initialized; per-request `_meta` version and capabilities; discover; drops SSE resumability."
+    },
+    {
+      "sep": "SEP-2567",
+      "title": "Sessionless MCP via Explicit State Handles",
+      "url": "https://modelcontextprotocol.io/seps/2567-sessionless-mcp",
+      "why": "Removes `Mcp-Session-Id`; cross-call state becomes ordinary tool args (server-minted handles)."
+    },
+    {
+      "sep": "SEP-2322",
+      "title": "Multi Round-Trip Requests",
+      "url": "https://modelcontextprotocol.io/seps/2322-MRTR",
+      "why": "Design and security notes for `InputRequiredResult` and `requestState`."
+    },
+    {
+      "sep": "SEP-2663",
+      "title": "Tasks Extension",
+      "url": "https://modelcontextprotocol.io/seps/2663-tasks-extension",
+      "why": "Moves Tasks out of core into `io.modelcontextprotocol/tasks`."
+    },
+    {
+      "sep": "SEP-2577",
+      "title": "Deprecate Roots, Sampling, and Logging",
+      "url": "https://modelcontextprotocol.io/seps/2577-deprecate-roots-sampling-and-logging",
+      "why": "Migration paths: tool params / provider APIs / stderr + OpenTelemetry."
+    },
+    {
+      "sep": "SEP-2596",
+      "title": "Specification Feature Lifecycle and Deprecation Policy",
+      "url": "https://modelcontextprotocol.io/seps/2596-spec-feature-lifecycle-and-deprecation",
+      "why": "Policy that powers the deprecated registry; reclassifies older deprecations (HTTP+SSE, includeContext)."
+    },
+    {
+      "sep": "SEP-2549",
+      "title": "TTL for List Results",
+      "url": "https://modelcontextprotocol.io/seps/2549-TTL-for-list-results",
+      "why": "Adds `ttlMs` / `cacheScope` grounding for cacheable lists."
+    },
+    {
+      "sep": "SEPs index",
+      "title": "All proposals",
+      "url": "https://modelcontextprotocol.io/seps",
+      "why": "Scan for new Finals during the weekly ritual."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "0001-what-is-mcp",
+      "title": "0001 — What is MCP?",
+      "summary": "Model Context Protocol is an open JSON-RPC 2.0 protocol that lets LLM applications share context and tools with external systems. Inspiration comes from the Language Server Protocol: one integration model, many editors (here: many AI hosts).\n\nMCP does **not** dictate how the host uses the LLM or how it stores conversation history. It only standardizes context exchange."
+    },
+    {
+      "id": "0002-architecture-host-client-server",
+      "title": "0002 — Architecture: host, client, server",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0003-primitives-tools-resources-prompts",
+      "title": "0003 — Primitives: tools, resources, prompts",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0004-transports-stdio-streamable-http",
+      "title": "0004 — Transports: stdio and Streamable HTTP",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0005-stateless-discovery-and-meta",
+      "title": "0005 — Stateless discovery and `_meta`",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0006-mrtr-and-elicitation",
+      "title": "0006 — MRTR and elicitation",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0007-extensions-tasks-apps-auth",
+      "title": "0007 — Extensions: Tasks, Apps, Auth",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0008-whats-new-2026-07-28",
+      "title": "0008 — What's new in 2026-07-28",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0009-security-and-trust",
+      "title": "0009 — Security and trust",
+      "summary": "[!info] Business Explanation"
+    },
+    {
+      "id": "0010-fleet-mcp-map",
+      "title": "0010 — Fleet MCP map",
+      "summary": "[!info] Business Explanation"
+    }
+  ],
+  "cheatSheet": {
+    "roles": "Host (AI app) creates clients. Each client is 1:1 with one server. Servers expose tools, resources, prompts and must not see the full multi-server conversation.",
+    "metaKeys": [
+      [
+        "io.modelcontextprotocol/protocolVersion",
+        "Client",
+        "e.g. \"2026-07-28\""
+      ],
+      [
+        "io.modelcontextprotocol/clientCapabilities",
+        "Client",
+        "elicitation, extensions, …"
+      ],
+      [
+        "io.modelcontextprotocol/clientInfo",
+        "Client SHOULD",
+        "name + version"
+      ],
+      [
+        "io.modelcontextprotocol/serverInfo",
+        "Server SHOULD",
+        "name + version on results"
+      ],
+      [
+        "io.modelcontextprotocol/logLevel",
+        "Client optional",
+        "per-request log notifications"
+      ]
+    ],
+    "rpcs": [
+      [
+        "Server MUST",
+        "server/discover",
+        "versions + capabilities + identity"
+      ],
+      [
+        "Server",
+        "tools/list, tools/call",
+        "deterministic list order SHOULD"
+      ],
+      [
+        "Server",
+        "resources/list, resources/read",
+        "plus templates"
+      ],
+      [
+        "Server",
+        "prompts/list, prompts/get",
+        "templated workflows"
+      ],
+      [
+        "Either",
+        "subscriptions/listen",
+        "opt-in change stream"
+      ],
+      [
+        "Pattern",
+        "MRTR",
+        "resultType input_required then retry"
+      ]
+    ],
+    "resultTypes": [
+      [
+        "complete",
+        "Done (legacy omit ⇒ treat as complete)"
+      ],
+      [
+        "input_required",
+        "Gather inputRequests, echo requestState, retry with new id"
+      ]
+    ],
+    "transports": [
+      [
+        "stdio",
+        "Local process, one client"
+      ],
+      [
+        "Streamable HTTP",
+        "Remote POST; no session id; no Last-Event-ID resume"
+      ]
+    ],
+    "security": [
+      "Explicit user consent for data access and tool calls",
+      "Treat tool annotations as untrusted unless the server is trusted",
+      "Protect requestState integrity (HMAC/AEAD) if it affects auth",
+      "Host keeps conversation history; servers stay isolated"
+    ],
+    "extensions": [
+      "io.modelcontextprotocol/tasks",
+      "MCP Apps / UI",
+      "Auth extensions (client credentials, enterprise-managed)"
+    ]
+  },
+  "changelog": {
+    "major": [
+      "No protocol-level sessions — Mcp-Session-Id removed. Cross-call state uses server-minted handles as ordinary tool args (SEP-2567).",
+      "Stateless MCP — initialize / notifications/initialized removed. Every request carries version + client capabilities in _meta (SEP-2575).",
+      "server/discover required — advertise versions, capabilities, identity.",
+      "subscriptions/listen replaces HTTP GET + resources/subscribe for change notifications.",
+      "Removed ping, logging/setLevel, notifications/roots/list_changed. Log level is per-request via _meta logLevel.",
+      "Tasks moved to extension io.modelcontextprotocol/tasks — poll tasks/get, mid-flight tasks/update (SEP-2663).",
+      "MRTR replaces server-initiated requests — InputRequiredResult + client retry (SEP-2322).",
+      "Required resultType — complete or input_required.",
+      "No SSE resumability — broken stream ⇒ client re-issues with a new request id."
+    ],
+    "deprecated": [
+      [
+        "Roots, Sampling, Logging",
+        "Tool params / resources / provider APIs / stderr+OTel"
+      ],
+      [
+        "HTTP+SSE transport",
+        "Streamable HTTP"
+      ],
+      [
+        "includeContext thisServer / allServers",
+        "omit or \"none\""
+      ],
+      [
+        "OAuth DCR (RFC7591)",
+        "Client ID Metadata Documents"
+      ]
+    ]
+  },
+  "ladders": {
+    "A": {
+      "name": "Protocol core",
+      "weight": "35%",
+      "100": "Map the actors. Host vs Client vs Server; tools / resources / prompts; JSON-RPC; stdio vs Streamable HTTP at altitude.",
+      "200": "Speak the RPCs. server/discover, */list, tools/call, resources/read, prompts/get, subscriptions/listen; _meta fields; resultType; caching (ttlMs, cacheScope).",
+      "300": "Design for isolation. Progressive tool discovery across many servers; capability negotiation; when a server must not see peer context; error-code ranges."
+    },
+    "B": {
+      "name": "2026-07-28 changes",
+      "weight": "30%",
+      "100": "Name the breaks. No sessions / no initialize; MRTR replaces server-initiated requests; Tasks left core; Roots/Sampling/Logging deprecated.",
+      "200": "Trace each replacement. _meta on every request; InputRequiredResult + retry; subscriptions/listen; Tasks extension; Streamable HTTP without Last-Event-ID resume.",
+      "300": "Migrate under ambiguity. Dual-stack hosts during SDK lag; detecting protocol era; SEP trail; feature lifecycle Active → Deprecated (≥12 months) → Removed."
+    },
+    "C": {
+      "name": "Security & authorization",
+      "weight": "20%",
+      "100": "Consent principles. User control, data privacy, tool safety; treat annotations as untrusted.",
+      "200": "Auth mechanics. OAuth for remote user data; validate iss; Client ID Metadata Documents vs DCR; requestState integrity (HMAC/AEAD).",
+      "300": "Threat models. Confused-deputy / tool poisoning; local-install risks (SEP-1024); enterprise-managed auth extension; policy for stdio vs remote."
+    },
+    "D": {
+      "name": "Build & labs",
+      "weight": "15%",
+      "100": "Inventory. Map your host config servers to transport + trust tier.",
+      "200": "Inspector + one server. Discover → list → call; note ttlMs; compare a local stdio server vs a remote HTTP server.",
+      "300": "Migration brief. Capstone: what breaks if a dependency still speaks 2025-11-25; Skills vs MCP vs CLI decision for one workflow."
+    }
+  },
+  "capstone": {
+    "artifacts": [
+      {
+        "id": "A1",
+        "title": "Migration memo",
+        "intent": "Explain 2025-11-25 → 2026-07-28 breaks and a phased plan.",
+        "required": [
+          "One page (or ≤600 words) memo to a tech lead",
+          "Table: removed / replaced / moved-to-extension / deprecated",
+          "Call out: initialize gone, Mcp-Session-Id gone, server/discover MUST, MRTR, subscriptions/listen, Tasks extension, resultType, ttlMs/cacheScope",
+          "30/60/90-day style phases"
+        ],
+        "pass": "Spec fidelity ≥ 2 and Security ≥ 2; total ≥ 10/15; at least five changelog themes; zero secrets."
+      },
+      {
+        "id": "A2",
+        "title": "Inspector lab",
+        "intent": "Hands-on notes from discover / list / call / optional listen against a demo server.",
+        "required": [
+          "Record transport (stdio or Streamable HTTP)",
+          "Paste redacted discover summary (versions/capabilities only)",
+          "One list + one read-only call with outcome",
+          "Note any ttlMs / cacheScope / resultType observed"
+        ],
+        "pass": "Shows real exercise of discovery and at least one list + call; no credentials in the write-up."
+      },
+      {
+        "id": "A3",
+        "title": "Mock protocol review",
+        "intent": "Critique a fictional host/server diff for 2026-07-28 compliance and security.",
+        "required": [
+          "List findings tied to public spec URLs",
+          "Flag session/initialize leftovers, missing discover, unsafe requestState, annotation trust mistakes",
+          "Separate must-fix vs nice-to-have"
+        ],
+        "pass": "At least three accurate findings with citations; no invented exploit steps."
+      }
+    ],
+    "scoring": [
+      [
+        "0",
+        "Missing or contradicted by the 2026-07-28 spec"
+      ],
+      [
+        "1",
+        "Partial; major gaps or old-session assumptions"
+      ],
+      [
+        "2",
+        "Solid; minor omissions"
+      ],
+      [
+        "3",
+        "Accurate, cited, actionable"
+      ]
+    ],
+    "dimensions": [
+      "Spec fidelity",
+      "Change prioritization",
+      "Security judgment",
+      "Clarity",
+      "Evidence"
+    ]
+  },
+  "diagrams": [
+    {
+      "title": "Architecture · host / client / server",
+      "src": "assets/diagrams/mcp-architecture-2026-07-28.png",
+      "alt": "MCP architecture diagram 2026-07-28"
+    },
+    {
+      "title": "What changed · 2025-11-25 → 2026-07-28",
+      "src": "assets/diagrams/mcp-whats-new-2026-07-28.png",
+      "alt": "MCP what is new diagram 2026-07-28"
+    }
+  ]
+}
