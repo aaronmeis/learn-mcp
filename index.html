@@ -129,12 +129,17 @@ tr:hover td { background: rgba(46,196,182,.05); }
 .btn:hover { background: var(--amber); color: var(--ink); }
 .btn.ghost { border-color: var(--line); color: var(--muted); }
 .btn.ghost:hover { border-color: var(--teal); color: var(--paper); background: transparent; }
+.btn.active {
+  color: var(--ink); background: var(--teal); border-color: var(--teal); font-weight: 600;
+}
 .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0; }
+.kbd-hint { font-size: 11px; color: var(--muted); letter-spacing: .04em; }
 
 .flash {
   min-height: 220px; display: grid; place-items: center; text-align: center; padding: 28px;
   border: 1px dashed var(--line); background: rgba(0,0,0,.28); border-radius: var(--radius); cursor: pointer;
 }
+.flash:focus { outline: 2px solid var(--teal); outline-offset: 2px; }
 .flash .q { font-family: var(--display); font-size: 22px; max-width: 40ch; }
 .flash .a { color: var(--teal); font-size: 15px; max-width: 48ch; }
 
@@ -283,12 +288,18 @@ a { color: var(--teal); }
   <section class="panel" id="cards">
     <h2>Flashcards</h2>
     <div class="row">
-      <button class="btn ghost" id="cardPrev">Prev</button>
-      <button class="btn" id="cardFlip">Flip</button>
-      <button class="btn ghost" id="cardNext">Next</button>
-      <span class="muted" id="cardMeta"></span>
+      <button class="btn active" type="button" id="cardSetCore" aria-pressed="true">Core 50</button>
+      <button class="btn ghost" type="button" id="cardSetFull" aria-pressed="false">Full deck</button>
+      <span class="muted" id="cardLoadNote">Seed deck until JSON loads</span>
     </div>
-    <div class="flash" id="flash" title="Click to flip"></div>
+    <div class="row">
+      <button class="btn ghost" type="button" id="cardPrev">Prev</button>
+      <button class="btn" type="button" id="cardFlip">Flip</button>
+      <button class="btn ghost" type="button" id="cardNext">Next</button>
+      <span class="muted" id="cardMeta"></span>
+      <span class="kbd-hint">← → navigate · Space flip</span>
+    </div>
+    <div class="flash" id="flash" title="Click or Space to flip" tabindex="0" role="button" aria-label="Flashcard. Space flips. Arrow keys move."></div>
   </section>
 
   <section class="panel" id="quiz">
@@ -460,11 +471,20 @@ const store = {
 
 /* === TABS === */
 const tabs = document.getElementById("tabs");
+function activateTab(tabId) {
+  const btn = tabs.querySelector(`button[data-tab="${tabId}"]`);
+  if (!btn) return;
+  tabs.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === tabId));
+  if (tabId === "cards") {
+    const flash = document.getElementById("flash");
+    if (flash) flash.focus({ preventScroll: true });
+  }
+}
 tabs.addEventListener("click", (e) => {
   const btn = e.target.closest("button[data-tab]");
   if (!btn) return;
-  tabs.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
-  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === btn.dataset.tab));
+  activateTab(btn.dataset.tab);
 });
 
 /* === LANES === */
@@ -499,18 +519,108 @@ document.getElementById("changeMap").innerHTML = CHANGES.map(([o,n]) =>
 ).join("");
 
 /* === CARDS === */
+const CARD_CORE_SIZE = 50;
+const SEED_CARDS = CARDS.slice();
+let ALL_CARDS = SEED_CARDS.slice();
 let cardI = 0, showA = false;
+let cardSet = store.get("mcp.cardSet", "core"); // "core" | "full"
+
+function pickCoreCards(all, n = CARD_CORE_SIZE) {
+  if (!all.length) return [];
+  if (all.length <= n) return all.slice();
+  const byTag = new Map();
+  all.forEach((c, idx) => {
+    const t = c.tag || "general";
+    if (!byTag.has(t)) byTag.set(t, []);
+    byTag.get(t).push({ c, idx });
+  });
+  const tags = [...byTag.keys()].sort();
+  const out = [];
+  const seen = new Set();
+  let round = 0;
+  while (out.length < n) {
+    let added = false;
+    for (const t of tags) {
+      const bucket = byTag.get(t);
+      if (round < bucket.length) {
+        const { c, idx } = bucket[round];
+        if (!seen.has(idx)) {
+          seen.add(idx);
+          out.push(c);
+          added = true;
+          if (out.length >= n) break;
+        }
+      }
+    }
+    if (!added) break;
+    round++;
+  }
+  return out;
+}
+
+function applyCardSet(setName, resetIndex = true) {
+  cardSet = setName === "full" ? "full" : "core";
+  store.set("mcp.cardSet", cardSet);
+  CARDS = cardSet === "full" ? ALL_CARDS.slice() : pickCoreCards(ALL_CARDS, CARD_CORE_SIZE);
+  if (resetIndex) cardI = 0;
+  else cardI = Math.min(cardI, Math.max(0, CARDS.length - 1));
+  showA = false;
+  const coreBtn = document.getElementById("cardSetCore");
+  const fullBtn = document.getElementById("cardSetFull");
+  coreBtn.classList.toggle("active", cardSet === "core");
+  coreBtn.classList.toggle("ghost", cardSet !== "core");
+  coreBtn.setAttribute("aria-pressed", cardSet === "core" ? "true" : "false");
+  fullBtn.classList.toggle("active", cardSet === "full");
+  fullBtn.classList.toggle("ghost", cardSet !== "full");
+  fullBtn.setAttribute("aria-pressed", cardSet === "full" ? "true" : "false");
+  const note = document.getElementById("cardLoadNote");
+  if (note) {
+    note.textContent = cardSet === "core"
+      ? `Core set · ${CARDS.length} of ${ALL_CARDS.length} (tag-balanced)`
+      : `Full deck · ${CARDS.length} cards`;
+  }
+  renderCard();
+}
+
 function renderCard() {
+  if (!CARDS.length) {
+    document.getElementById("flash").innerHTML = `<div class="q">No cards loaded</div>`;
+    document.getElementById("cardMeta").textContent = "0 / 0";
+    return;
+  }
+  cardI = ((cardI % CARDS.length) + CARDS.length) % CARDS.length;
   const c = CARDS[cardI];
   const el = document.getElementById("flash");
   el.innerHTML = showA ? `<div class="a">${c.back}</div>` : `<div class="q">${c.front}</div>`;
-  document.getElementById("cardMeta").textContent = `${cardI+1} / ${CARDS.length}`;
+  document.getElementById("cardMeta").textContent = `${cardI + 1} / ${CARDS.length}`;
 }
-document.getElementById("flash").onclick = () => { showA = !showA; renderCard(); };
-document.getElementById("cardFlip").onclick = () => { showA = !showA; renderCard(); };
-document.getElementById("cardPrev").onclick = () => { cardI = (cardI - 1 + CARDS.length) % CARDS.length; showA = false; renderCard(); };
-document.getElementById("cardNext").onclick = () => { cardI = (cardI + 1) % CARDS.length; showA = false; renderCard(); };
-renderCard();
+function flipCard() { showA = !showA; renderCard(); }
+function prevCard() { if (!CARDS.length) return; cardI = (cardI - 1 + CARDS.length) % CARDS.length; showA = false; renderCard(); }
+function nextCard() { if (!CARDS.length) return; cardI = (cardI + 1) % CARDS.length; showA = false; renderCard(); }
+
+document.getElementById("flash").onclick = flipCard;
+document.getElementById("cardFlip").onclick = flipCard;
+document.getElementById("cardPrev").onclick = prevCard;
+document.getElementById("cardNext").onclick = nextCard;
+document.getElementById("cardSetCore").onclick = () => applyCardSet("core");
+document.getElementById("cardSetFull").onclick = () => applyCardSet("full");
+
+function cardsPanelActive() {
+  return document.getElementById("cards")?.classList.contains("active");
+}
+function typingInField(el) {
+  if (!el) return false;
+  const tag = (el.tagName || "").toLowerCase();
+  return tag === "input" || tag === "textarea" || tag === "select" || el.isContentEditable;
+}
+document.addEventListener("keydown", (e) => {
+  if (!cardsPanelActive() || typingInField(e.target)) return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); prevCard(); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); nextCard(); }
+  else if (e.key === " " || e.code === "Space") { e.preventDefault(); flipCard(); }
+});
+
+applyCardSet(cardSet, true);
 
 /* === QUIZ === */
 let quizI = 0;
@@ -639,17 +749,9 @@ loadShorts();
     const res = await fetch("cards-data.json?ts=" + Date.now());
     const data = await res.json();
     const arr = Array.isArray(data) ? data : (data.cards || []);
-    if (arr.length >= 50) {
-      CARDS = arr.map(c => ({ front: c.front, back: c.back, tag: c.tag }));
-      cardI = 0; showA = false; renderCard();
-      let metaExtra = document.getElementById("cardLoadNote");
-      if (!metaExtra) {
-        metaExtra = document.createElement("p");
-        metaExtra.id = "cardLoadNote";
-        metaExtra.className = "muted";
-        document.getElementById("cards").insertBefore(metaExtra, document.getElementById("cards").children[1]);
-      }
-      metaExtra.textContent = `Loaded ${CARDS.length} flashcards from cards-data.json`;
+    if (arr.length >= 20) {
+      ALL_CARDS = arr.map(c => ({ front: c.front, back: c.back, tag: c.tag || "general" }));
+      applyCardSet(cardSet, true);
     }
   } catch (e) {
     console.warn("cards-data.json not ready yet", e);
