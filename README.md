@@ -8,7 +8,7 @@ Personal study console for Model Context Protocol revision **2026-07-28**: host/
 
 **Live:** https://aaronmeis.github.io/learn-mcp/
 
-**Disclaimer:** [disclaimer.md](./disclaimer.md)
+**Disclaimer:** [DISCLAIMER.md](./DISCLAIMER.md)
 
 ## What's here
 
