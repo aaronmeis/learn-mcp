@@ -299,8 +299,48 @@ a { color: var(--teal); }
 .week-loop ol { margin: 8px 0 0; padding-left: 18px; }
 .week-loop li { margin: 6px 0; }
 
+.showcase-grid {
+  display: grid; gap: 14px;
+  grid-template-columns: 1fr 1fr;
+}
+.showcase-item {
+  background: rgba(7,11,20,.55); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 14px 14px 12px; min-width: 0;
+}
+.showcase-item.top { border-left: 3px solid var(--amber); }
+.showcase-item.classic { border-left: 3px solid var(--teal); }
+.showcase-item .label { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.showcase-item > b { display: block; font-family: var(--display); font-size: 18px; margin-bottom: 4px; }
+.showcase-item > .blurb { margin: 0 0 10px; color: var(--muted); font-size: 12.5px; }
+details.sc-box {
+  background: rgba(0,0,0,.28); border: 1px solid var(--line); border-radius: 0 6px 6px 0;
+  padding: .45rem .75rem; margin-top: .4rem; font-size: 12.5px; line-height: 1.5;
+}
+details.sc-box.what { border-left: 3px solid var(--teal); }
+details.sc-box.why { border-left: 3px solid var(--amber); }
+details.sc-box.how { border-left: 3px solid var(--ok); }
+details.sc-box summary {
+  cursor: pointer; font-weight: 600; outline: none; user-select: none; font-size: 12px;
+  color: var(--paper); list-style: none;
+}
+details.sc-box summary::-webkit-details-marker { display: none; }
+details.sc-box summary::before {
+  content: "▸ "; color: var(--muted); font-size: 11px;
+}
+details.sc-box[open] summary::before { content: "▾ "; color: var(--amber); }
+details.sc-box[open] summary {
+  margin-bottom: .35rem; border-bottom: 1px solid var(--line); padding-bottom: .25rem;
+}
+details.sc-box.what summary { color: var(--teal); }
+details.sc-box.why summary { color: var(--amber); }
+details.sc-box.how summary { color: var(--ok); }
+details.sc-box p { margin: .35rem 0 0; color: var(--paper); font-size: 12.5px; }
+details.sc-box ul { margin: .35rem 0 0; padding-left: 1.1rem; }
+details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
+
 @media (max-width: 1100px) {
   .grid.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .showcase-grid { grid-template-columns: 1fr; }
   .split { grid-template-columns: 1fr; }
   .shorts-gallery { grid-template-columns: 280px minmax(0, 1fr); }
   .carousel { max-width: 280px; }
@@ -311,7 +351,7 @@ a { color: var(--teal); }
   .top { grid-template-columns: 1fr; }
   .pin { text-align: left; width: fit-content; }
   .panel { padding: 18px; }
-  .grid.cards, #gList, #promptList, .choices { grid-template-columns: 1fr; }
+  .grid.cards, #gList, #promptList, .choices, .showcase-grid { grid-template-columns: 1fr; }
   .lane { grid-template-columns: 1fr; }
   .change-map { grid-template-columns: 1fr; }
   .change-map .arrow { transform: rotate(90deg); padding: 4px 0; }
@@ -467,13 +507,15 @@ a { color: var(--teal); }
   </section>
 
   <section class="panel" id="showcase">
-    <h2>Popular MCP showcase</h2>
-    <p class="muted">Live ranks move. This is a concrete gallery so MCP is not abstract. Source: MCP Toplist composite (Sep 2026) + classic first-install picks.</p>
+    <div class="panel-head">
+      <h2>Popular MCP showcase</h2>
+      <p class="muted">Expand What / Why / How on each card. Ranks move; treat this as a starting gallery.</p>
+    </div>
     <h3>Top 10 · MCP Toplist</h3>
-    <div class="grid cards" id="showcaseTop"></div>
+    <div class="showcase-grid" id="showcaseTop"></div>
     <h3>Classic first installs</h3>
-    <div class="grid cards" id="showcaseClassic"></div>
-    <p class="muted">Ranks move. Treat this as a starting gallery, not a permanent leaderboard.</p>
+    <div class="showcase-grid" id="showcaseClassic"></div>
+    <p class="muted" style="margin-top:14px">Source: MCP Toplist composite (Sep 2026) + common first-install picks. Always re-check install auth and trust before wiring a server into a host.</p>
   </section>
 
   <section class="panel" id="shorts">
@@ -823,34 +865,139 @@ document.getElementById("promptList").innerHTML = PROMPTS.map(p =>
 ).join("");
 
 /* === SHOWCASE === */
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+function showcaseCard(item, kind) {
+  const label = kind === "top"
+    ? `Rank ${esc(item.rank)} · ${esc(item.stars)}`
+    : esc(item.transport);
+  return `<article class="showcase-item ${kind}">
+    <div class="label">${label}</div>
+    <b>${esc(item.name)}</b>
+    <p class="blurb">${esc(item.blurb)}</p>
+    <details class="sc-box what"><summary>What it is</summary><p>${esc(item.what)}</p></details>
+    <details class="sc-box why"><summary>Why use it</summary><p>${esc(item.why)}</p></details>
+    <details class="sc-box how"><summary>How to use it</summary><p>${esc(item.how)}</p></details>
+  </article>`;
+}
+
 const SHOWCASE_TOP = [
-  ["1", "Assistant UI", "~12k★", "Chat/UI primitives as MCP"],
-  ["2", "Chrome DevTools MCP", "~51k★", "Browser debugging for agents"],
-  ["3", "Browser Use", "~112k★", "Browser automation MCP"],
-  ["4", "ComfyUI MCP", "~0.7k★", "Image/comfy workflows"],
-  ["5", "MarkItDown", "~178k★", "Docs → markdown (Microsoft)"],
-  ["6", "HA MCP", "~4.6k★", "Home Assistant control"],
-  ["7", "Context7", "~62k★", "Version-specific library docs"],
-  ["8", "Scrapling MCP", "~79k★", "Scraping / extraction"],
-  ["9", "n8n-MCP", "~23k★", "Workflow automation bridge"],
-  ["10", "Codebase Memory", "~42k★", "Codebase retrieval memory"],
+  {
+    rank: "1", name: "Assistant UI", stars: "~12k★", blurb: "Chat/UI primitives exposed as MCP",
+    what: "An MCP surface for assistant chat UI building blocks: threads, composers, message parts, and related UI primitives that hosts can call as tools/resources.",
+    why: "Useful when you want agents to drive or inspect a chat UI without hard-coding a one-off React integration. Keeps UI capabilities discoverable like any other MCP server.",
+    how: "Install from its registry/GitHub listing, connect over the transport it documents, then list tools and try a read-only UI inspect call before write actions. Keep consent on for anything that mutates the thread."
+  },
+  {
+    rank: "2", name: "Chrome DevTools MCP", stars: "~51k★", blurb: "Browser debugging / DevTools for agents",
+    what: "An MCP server that wraps Chrome DevTools Protocol capabilities so agents can inspect pages, network, console, and performance signals.",
+    why: "Debugging in the browser is still mostly human. This lets an agent gather DOM, network, and runtime evidence instead of guessing from screenshots alone.",
+    how: "Run Chrome with the remote debugging port the server expects, attach the MCP client, then start with read-only inspect/list calls. Avoid destructive navigation until you trust the tool annotations and host consent UX."
+  },
+  {
+    rank: "3", name: "Browser Use", stars: "~112k★", blurb: "High-visibility browser automation MCP",
+    what: "A browser automation MCP that lets agents open pages, click, type, and extract content through a controlled browser session.",
+    why: "Many workflows still live only in a UI. Browser Use is a practical way to automate those flows when there is no clean API.",
+    how: "Install the server, point it at a browser backend it supports, then rehearse one narrow task (open URL → extract text) before multi-step flows. Prefer scoped allowlists and watch for prompt-injection from page content."
+  },
+  {
+    rank: "4", name: "ComfyUI MCP", stars: "~0.7k★", blurb: "Image / Comfy workflow control via MCP",
+    what: "An MCP bridge into ComfyUI so agents can trigger or inspect generative image workflows instead of clicking the node graph by hand.",
+    why: "Comfy graphs are powerful but fiddly. MCP turns common run/inspect actions into callable tools for batch or agent-driven image work.",
+    how: "Run ComfyUI locally, connect the MCP server to that instance, list tools, then call a small known workflow first. Keep generation parameters explicit and never paste API keys into prompts."
+  },
+  {
+    rank: "5", name: "MarkItDown", stars: "~178k★", blurb: "Docs → markdown (Microsoft)",
+    what: "Microsoft's document conversion utility exposed for agents: turn PDFs, Office files, and similar inputs into markdown-friendly text.",
+    why: "Models handle markdown better than opaque binaries. This is a fast path from messy documents into readable context.",
+    how: "Point it at a local file or supported input, call the convert tool, then feed the markdown into your notebook or chat. Scope filesystem access tightly; do not open untrusted archives blindly."
+  },
+  {
+    rank: "6", name: "HA MCP", stars: "~4.6k★", blurb: "Home Assistant control plane",
+    what: "An MCP server for Home Assistant entities, services, and state so agents can query or act on a smart-home instance.",
+    why: "Home automation is a clear agent use case, but direct REST scripting is brittle. MCP gives structured discovery of devices and services.",
+    how: "Create a restricted Home Assistant token, configure the MCP server against your instance, list entities first, then try one read-only state query before any service call that flips switches or locks."
+  },
+  {
+    rank: "7", name: "Context7", stars: "~62k★", blurb: "Version-specific library docs into context",
+    what: "A remote MCP that retrieves up-to-date, version-aware library documentation for injection into the model context.",
+    why: "Training cutoffs and stale READMEs cause bad API advice. Context7 reduces that by pulling current docs for the library version you name.",
+    how: "Add the remote server in your host config, ask for docs on a specific package + version, then verify the returned snippets against the official site for anything security-sensitive."
+  },
+  {
+    rank: "8", name: "Scrapling MCP", stars: "~79k★", blurb: "Scraping / extraction server",
+    what: "An MCP for web scraping and structured extraction: fetch pages and pull fields agents can reason over.",
+    why: "When sites lack APIs, scraping is still how research agents gather evidence. A dedicated MCP keeps that capability modular.",
+    how: "Configure allowed domains if the server supports it, start with a single public page extract, and respect robots/ToS. Treat scraped HTML as untrusted input to the model."
+  },
+  {
+    rank: "9", name: "n8n-MCP", stars: "~23k★", blurb: "Workflow automation bridge",
+    what: "A bridge that exposes n8n workflows and related automation actions to MCP hosts.",
+    why: "Teams already encode ops in n8n. MCP lets an agent trigger or inspect those workflows instead of rebuilding them as bespoke tools.",
+    how: "Connect to your n8n instance with least-privilege credentials, list available workflows, then run a harmless test workflow before anything that sends email, money, or production changes."
+  },
+  {
+    rank: "10", name: "Codebase Memory", stars: "~42k★", blurb: "Codebase retrieval memory for agents",
+    what: "An MCP that indexes or retrieves codebase knowledge so agents can answer with project-local context instead of only open files.",
+    why: "Large repos overflow context windows. A memory/retrieval MCP keeps answers grounded in the actual tree.",
+    how: "Point it at a repo path or index it per the README, run a retrieval query for a known symbol, then compare hits to grep. Re-index after major refactors."
+  },
 ];
+
 const SHOWCASE_CLASSIC = [
-  ["GitHub", "Repos · PRs · issues · Actions", "Remote / OAuth"],
-  ["Playwright", "Browser automation & testing", "Often stdio"],
-  ["Filesystem", "Scoped local read/write", "stdio"],
-  ["Context7", "Up-to-date library docs", "Remote"],
-  ["Fetch", "URL → clean content", "stdio"],
-  ["Firecrawl", "Web research scrape/map", "Remote"],
-  ["Notion / Slack / Drive", "Knowledge & collab", "Remote OAuth"],
-  ["PostgreSQL / Supabase", "NL → database", "Local/remote"],
+  {
+    name: "GitHub", transport: "Remote / OAuth or PAT", blurb: "Repos · PRs · issues · Actions",
+    what: "Official-style GitHub MCP for repositories, pull requests, issues, checks, and Actions metadata.",
+    why: "Most agent coding work eventually touches GitHub. Native tools beat brittle curl wrappers and keep auth in the host.",
+    how: "Prefer OAuth or a fine-scoped PAT, connect the remote server, list tools, then try a read-only repo/issue fetch before create/merge operations. Never commit secrets."
+  },
+  {
+    name: "Playwright", transport: "Often local stdio", blurb: "Browser automation & testing",
+    what: "Playwright exposed over MCP so agents can drive browsers for tests, screenshots, and UI verification.",
+    why: "Reliable browser automation with tracing and selectors beats ad-hoc DOM scripts, especially for regression checks.",
+    how: "Install browsers via Playwright, run the MCP as stdio from your host config, start with goto + screenshot, then add clicks. Keep headed mode on while learning."
+  },
+  {
+    name: "Filesystem", transport: "stdio", blurb: "Scoped local read/write",
+    what: "Reference filesystem MCP that reads/writes only inside directories you allow.",
+    why: "Agents need local files, but unrestricted disk access is dangerous. A scoped filesystem server is the safe default.",
+    how: "Configure an allowlist root, verify list/read works, only then enable write. Double-check paths before destructive deletes."
+  },
+  {
+    name: "Context7", transport: "Remote", blurb: "Up-to-date library docs",
+    what: "Same Context7 docs MCP listed in the Top 10: version-specific library documentation over a remote transport.",
+    why: "It is one of the highest-leverage first installs for coding agents that must cite current APIs.",
+    how: "Add the remote endpoint, request docs for one library you know well, and sanity-check the answer. Use it whenever the model invents outdated APIs."
+  },
+  {
+    name: "Fetch", transport: "stdio / simple", blurb: "URL → clean content",
+    what: "A small reference MCP that fetches a URL and returns cleaned textual content for the model.",
+    why: "Sometimes you only need one page of context without a full scraper stack.",
+    how: "Install as stdio, call fetch on a public docs URL, then inspect the returned text length and quality. Do not fetch authenticated or internal URLs without review."
+  },
+  {
+    name: "Firecrawl", transport: "Remote", blurb: "Web research scrape / map / agent",
+    what: "Remote MCP for crawl, scrape, map, and research-style web gathering with structured outputs.",
+    why: "Strong when the answer spans many pages or you need site maps before deep reads.",
+    how: "Set the API key in the host env (never in chat), connect the remote server, try map or scrape on a public docs site, then graduate to multi-page research jobs."
+  },
+  {
+    name: "Notion / Slack / Drive", transport: "Remote OAuth", blurb: "Knowledge & collaboration surfaces",
+    what: "Vendor MCP servers that connect agents to Notion pages, Slack channels, or Google Drive files via OAuth.",
+    why: "Team knowledge already lives in these apps. MCP is how agents read or draft there under user consent.",
+    how: "Complete OAuth in the host, start with read-only search/list, and require explicit approval for posts or file writes. Redact secrets before sharing transcripts."
+  },
+  {
+    name: "PostgreSQL / Supabase", transport: "Local or remote", blurb: "Natural-language database access",
+    what: "Database MCPs that expose schema discovery and query tools for Postgres-compatible stores, including Supabase.",
+    why: "Lets agents inspect and query data with structured tools instead of pasting connection strings into free-form SQL chat.",
+    how: "Use a read-only DB role first, connect the server, list schemas/tables, run a SELECT, and only later consider writes. Never expose production admin credentials to the model."
+  },
 ];
-document.getElementById("showcaseTop").innerHTML = SHOWCASE_TOP.map(([r,n,s,w]) =>
-  `<div class="card amber"><div class="label">Rank ${r} · ${s}</div><b>${n}</b><p>${w}</p></div>`
-).join("");
-document.getElementById("showcaseClassic").innerHTML = SHOWCASE_CLASSIC.map(([n,j,t]) =>
-  `<div class="card"><div class="label">${t}</div><b>${n}</b><p>${j}</p></div>`
-).join("");
+
+document.getElementById("showcaseTop").innerHTML = SHOWCASE_TOP.map((item) => showcaseCard(item, "top")).join("");
+document.getElementById("showcaseClassic").innerHTML = SHOWCASE_CLASSIC.map((item) => showcaseCard(item, "classic")).join("");
 
 /* === SHORTS CAROUSEL === */
 let shortItems = [];
