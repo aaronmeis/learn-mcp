@@ -765,52 +765,52 @@
     {
       "id": "0001-what-is-mcp",
       "title": "0001 . What is MCP?",
-      "summary": "Model Context Protocol is an open JSON-RPC 2.0 protocol that lets LLM applications share context and tools with external systems. Inspiration comes from the Language Server Protocol: one integration model, many editors (here: many AI hosts).\n\nMCP does **not** dictate how the host uses the LLM or how it stores conversation history. It only standardizes context exchange."
+      "summary": "Without a shared protocol, every AI product ships custom plugins. MCP standardizes how hosts discover and call tools and how servers expose data, so one server can serve many hosts.\n\nModel Context Protocol is an open JSON-RPC 2.0 protocol that lets LLM applications share context and tools with external systems. Inspiration comes from the Language Server Protocol: one integration model, many editors (here: many AI hosts).\n\nWhat servers can offer. Resources: Data / context for user or model Prompts: Templated workflows Tools: Functions the model may execute\n\nWhat clients may offer. Elicitation: Ask the user for more input Sampling / Roots / Logging: Deprecated — do not build new features on them\n\nUtilities. Configuration, progress, cancellation, error reporting, caching hints (ttlMs), subscriptions for list/resource changes."
     },
     {
       "id": "0002-architecture-host-client-server",
       "title": "0002 . Architecture: host, client, server",
-      "summary": "[!info] Business Explanation"
+      "summary": "Isolation is the product feature. The host coordinates many MCP clients; each client has a dedicated link to one server. Servers stay easy to build and composable, and they never read the whole conversation.\n\nRoles. Host: Creates clients, enforces permissions/consent, aggregates context for the LLM Client: 1:1 with a server; attaches version/capabilities on every request; manages subscriptions Server: Exposes focused capabilities; local (stdio) or remote (Streamable HTTP)\n\nLayers. Data layer — JSON-RPC: discovery, primitives, notifications, MRTR Transport layer — stdio or Streamable HTTP (framing, auth)\n\nPrinciples. Servers should be extremely easy to build; Servers should be highly composable; Servers must not read the whole conversation or peer into other servers; Features can be added progressively via capabilities / extensions."
     },
     {
       "id": "0003-primitives-tools-resources-prompts",
       "title": "0003 . Primitives: tools, resources, prompts",
-      "summary": "[!info] Business Explanation"
+      "summary": "A database MCP server might expose a schema as a resource, a few-shot query helper as a prompt, and run_query as a tool. Same server, three different shapes of context.\n\nTools. Discovered with tools/list, invoked with tools/call Each tool has name, optional title, description, inputSchema (JSON Schema) Results return a content array (text, images, resources, …) and may include structured output Servers SHOULD return tools in a deterministic order (client caching / prompt-cache hits) List results carry ttlMs and cacheScope\n\nResources. resources/list / resources/read (+ templates) Stable URIs for files, records, API payloads Change notifications via subscriptions/listen when opted in\n\nPrompts. prompts/list / prompts/get Parameterized templates for user or model-facing workflows\n\nDiscovery pattern. Hosts that federate many servers should use progressive tool discovery rather than dumping every tool into the model context at once (client best practices). Optional server/discover */list for the primitives you care about Call / read / get as needed Optionally subscriptions/listen for toolsListChanged, resourcesListChanged, …"
     },
     {
       "id": "0004-transports-stdio-streamable-http",
       "title": "0004 . Transports: stdio and Streamable HTTP",
-      "summary": "[!info] Business Explanation"
+      "summary": "Pick the transport for where the server lives. Same-machine tools (Draw.io, local calendar) fit stdio. Internet-hosted APIs fit Streamable HTTP with OAuth or tokens.\n\nstdio. Fleet example: [mcp_servers.drawio] via npx @drawio/mcp@1.5.0 (stdio only — never the hosted https://mcp.draw.io/mcp endpoint). Host spawns the server process Messages on stdin / stdout No network hop; strong fit for local secrets that never leave the machine Typically one client per process\n\nStreamable HTTP. If a response stream breaks, the client MUST re-issue as a new request with a new id. Client POSTs JSON-RPC to the server Optional streaming on the response Auth: bearer tokens, API keys, custom headers; OAuth recommended for user data As of 2026-07-28: no Mcp-Session-Id; no SSE Last-Event-ID resumability\n\nDeprecated transport. HTTP+SSE (legacy) is Deprecated under the feature lifecycle. Migrate to Streamable HTTP."
     },
     {
       "id": "0005-stateless-discovery-and-meta",
       "title": "0005 . Stateless discovery and `_meta`",
-      "summary": "[!info] Business Explanation"
+      "summary": "Stateless MCP means list endpoints do not secretly vary by connection, and load balancers do not need sticky sessions for protocol correctness. State that must survive across calls becomes an explicit handle in tool arguments.\n\nWhat was removed. Protocol-level sessions / Mcp-Session-Id initialize / notifications/initialized handshake\n\nWhat replaced them. Every request includes _meta fields such as:\n\nserver/discover. Servers MUST implement it Returns supportedVersions, capabilities, identity (serverInfo in result _meta) Clients MAY call it first or probe for compatibility (including on stdio) Response is typically cacheable (ttlMs, cacheScope)\n\nSubscriptions. Change notifications are opt-in via subscriptions/listen. Request-scoped progress/message notifications still ride the original request's response stream."
     },
     {
       "id": "0006-mrtr-and-elicitation",
       "title": "0006 . MRTR and elicitation",
-      "summary": "[!info] Business Explanation"
+      "summary": "MRTR is the big interaction change in 2026-07-28. Servers no longer fire freestanding requests at the client. They reply with resultType: \"input_required\", and the client retries the same logical operation with the answers attached.\n\nFlow. Client sends tools/call (or resources/read / prompts/get) Server needs user/LLM/roots input → InputRequiredResult Client fulfills inputRequests, echoes opaque requestState Client retries with a new JSON-RPC id and inputResponses Server returns resultType: \"complete\"\n\nAllowed on. tools/call: Yes resources/read: Yes prompts/get: Yes Everything else: MUST NOT"
     },
     {
       "id": "0007-extensions-tasks-apps-auth",
       "title": "0007 . Extensions: Tasks, Apps, Auth",
-      "summary": "[!info] Business Explanation"
+      "summary": "Extensions are disabled by default and need explicit support on both sides. That keeps simple servers simple while letting product hosts add charts-in-chat or async job handles when both parties agree.\n\nNegotiation. Client: clientCapabilities.extensions[\"io.modelcontextprotocol/…\"] Server: capabilities.extensions in server/discover Graceful degradation when only one side supports an extension\n\nOfficial highlights. Experimental extensions live under experimental-ext-* repos and need a Working/Interest Group. Tasks (io.modelcontextprotocol/tasks): Durable async handles; poll tasks/get; mid-flight input tasks/update; moved out of core in 2026-07-28 MCP Apps: Interactive UI (charts, forms, players) inside the host conversation OAuth client credentials: Machine-to-machine auth Enterprise-managed authorization: Central IdP policy for MCP\n\nSkills over MCP. Community working group exploring rich structured instructions discovered through MCP (related to how this fleet already uses skill files). See https://modelcontextprotocol.io/community/working-groups/skills-over-mcp"
     },
     {
       "id": "0008-whats-new-2026-07-28",
       "title": "0008 . What's new in 2026-07-28",
-      "summary": "[!info] Business Explanation"
+      "summary": "Treat this as a migration brief. Teams still coding against initialize handshakes and session headers will fail compatibility checks against the July 2026 revision.\n\nMigration mindset. Call initialize, wait for initialized: Put version + capabilities on every request; optional server/discover Stick to Mcp-Session-Id: Explicit state handles in tool args Server fires elicitation/create as its own request: Return input_required; client retries Core tasks/* blocking result: Opt into Tasks extension; poll Subscribe via resources subscribe / HTTP GET: subscriptions/listen\n\nFeature lifecycle. Active → Deprecated (≥12 months) → Removed. Registry: https://modelcontextprotocol.io/specification/2026-07-28/deprecated"
     },
     {
       "id": "0009-security-and-trust",
       "title": "0009 . Security and trust",
-      "summary": "[!info] Business Explanation"
+      "summary": "The protocol cannot enforce ethics. Hosts must. Users need to see what data leaves the machine and which tools run before they run.\n\nSpec principles. User consent and control — explicit authorization; clear UI Data privacy — host consent before exposing user data to servers; no silent retransmit Tool safety — tools are arbitrary code execution; annotations are untrusted unless the server is trusted; consent before invoke\n\nAuth highlights (2026-07-28). Prefer OAuth for remote user data Validate iss when present (RFC 9207) Prefer Client ID Metadata Documents over Dynamic Client Registration Bind credentials to the issuing authorization server; do not reuse across issuers Protect MRTR requestState if it influences authorization\n\nFleet standing rules. Never commit API keys, OAuth client secrets, cookies, or service-account JSON Prefer local stdio for high-sensitivity local tools (calendar, drawio) Do not point Draw.io at the hosted MCP App Server URL Redact sensitive prompts before cloud enhancement layers (e.g. Skywork)"
     },
     {
       "id": "0010-fleet-mcp-map",
       "title": "0010 . Fleet MCP map",
-      "summary": "[!info] Business Explanation"
+      "summary": "On snapdragon-grok, MCP is how Grok reaches Exa, Firecrawl, Google Calendar, Playwright, Tasks, Perplexity, and (when healthy) Draw.io and Runway. Skills still teach workflows; MCP attaches live tools.\n\nSkills vs MCP (keep the split). Skill: Markdown playbook the agent loads MCP server: Live tool/resource endpoint Hermes CLI: Terminal wrapper around APIs (often no MCP)\n\nGrok MCP (lean set, 2026-09-07). From workspace Agents.md / live session: exa: on firecrawl: on google-calendar: on playwright: on"
     }
   ],
   "cheatSheet": {

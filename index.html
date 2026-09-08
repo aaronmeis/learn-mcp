@@ -370,7 +370,8 @@ details.sc-box li { font-size: 12.5px; margin: .2rem 0; }
 .lesson-item summary::before { content: "▸"; color: var(--muted); font-family: var(--mono); font-size: 12px; }
 .lesson-item[open] summary::before { content: "▾"; color: var(--amber); }
 .lesson-item[open] summary { border-bottom: 1px solid var(--line); }
-.lesson-item p { margin: 0; padding: 12px 14px 14px; color: var(--muted); font-size: 13px; }
+.lesson-item .lesson-body { padding: 12px 14px 14px; display: grid; gap: 8px; }
+.lesson-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
 
 .diagram-grid {
   display: grid; gap: 14px;
@@ -1289,8 +1290,17 @@ function renderChangelog(ch) {
 
 function renderLessons(lessons) {
   if (!lessons) return;
-  document.getElementById("lessonList").innerHTML = lessons.map(l => `
-    <details class="lesson-item"><summary>${esc(l.title)}</summary><p>${esc(l.summary)}</p></details>`).join("");
+  document.getElementById("lessonList").innerHTML = lessons.map((l) => {
+    const paras = String(l.summary || "")
+      .split(/\n\s*\n/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .filter((p) => !/^\[!info\]/i.test(p));
+    const body = paras.length
+      ? `<div class="lesson-body">${paras.map((p) => `<p>${esc(p)}</p>`).join("")}</div>`
+      : `<div class="lesson-body"><p>Summary missing for this lesson.</p></div>`;
+    return `<details class="lesson-item"><summary>${esc(l.title)}</summary>${body}</details>`;
+  }).join("");
 }
 
 function renderDiagrams(diagrams) {
